@@ -7,7 +7,7 @@ import { loadConfig } from './config';
 import { BotClient } from './lib/bot-client';
 
 function startHeartbeatCheck() {
-    new Cron('* * * * * *', () => {
+    new Cron('0 * * * * *', () => {
         fetch(envParseString('HEARTBEAT_URL'))
             .then(() => console.log('Hit Heartbeat'))
             .catch(() => {});
