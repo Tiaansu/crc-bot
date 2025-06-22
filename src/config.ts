@@ -23,6 +23,7 @@ export function loadConfig(): void {
     const clientConfig: ClientConfig = {
         isDev,
         ownerIds: envParseArray('BOT_OWNER_IDS'),
+        serverAdminIds: envParseArray('SERVER_ADMIN_IDS'),
         tradingChannelId: envParseString('TRADING_CHANNEL_ID'),
         webhook: {
             id: envParseString('DISCORD_WEBHOOK').split('/').at(-2)!,

@@ -17,6 +17,7 @@ export class BotListener extends Listener {
         if (!message.channel.isSendable()) return;
 
         const { id: userId } = message.author;
+        if (this.container.config.serverAdminIds.includes(userId)) return;
         const lastIndex = this.lastUserMessageIndex.get(userId);
 
         if (lastIndex === undefined) {

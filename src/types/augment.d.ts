@@ -33,6 +33,7 @@ declare module '@sapphire/framework' {
 declare module '@skyra/env-utilities' {
     export interface Env {
         BOT_OWNER_IDS: ArrayString;
+        SERVER_ADMIN_IDS: ArrayString;
 
         TRADING_CHANNEL_ID: string;
 
