@@ -58,7 +58,6 @@ export const CLIENT_OPTIONS: ClientOptions = {
         }),
     },
     api: {
-        prefix: 'api/',
         origin: '*',
         listenOptions: {
             port: envParseNumber('PORT'),
