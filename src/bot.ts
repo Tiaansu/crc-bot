@@ -1,18 +1,8 @@
 import '@/lib/setup';
 import { container } from '@sapphire/pieces';
-import { envParseString } from '@skyra/env-utilities';
-import { Cron } from 'croner';
 import { codeBlock, EmbedBuilder } from 'discord.js';
 import { loadConfig } from './config';
 import { BotClient } from './lib/bot-client';
-
-function startHeartbeatCheck() {
-    new Cron('0 * * * * *', () => {
-        fetch(envParseString('HEARTBEAT_URL'))
-            .then(() => console.log('Hit Heartbeat'))
-            .catch(() => {});
-    });
-}
 
 function handleErrors() {
     process.on('unhandledRejection', (reason) => {
@@ -53,7 +43,6 @@ async function main(): Promise<void> {
 
     try {
         handleErrors();
-        startHeartbeatCheck();
 
         await client.login();
     } catch (error) {
