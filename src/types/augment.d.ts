@@ -1,4 +1,4 @@
-import type { ArrayString } from '@skyra/env-utilities';
+import type { ArrayString, NumberString } from '@skyra/env-utilities';
 import type { ClientConfig } from './config';
 import type WebhookErrorBuilder from '@/lib/structures/webhook-error-builder';
 import type { Guild } from 'discord.js';
@@ -40,5 +40,8 @@ declare module '@skyra/env-utilities' {
         DISCORD_WEBHOOK: string;
 
         DATABASE_URL: string;
+
+        PORT: NumberString;
+        HEARTBEAT_URL: string;
     }
 }

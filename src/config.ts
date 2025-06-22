@@ -1,7 +1,12 @@
 import type { ClientConfig } from '@/types/config';
 import { rootFolder } from '@/utils/constants';
 import { container } from '@sapphire/pieces';
-import { envParseArray, envParseString, setup } from '@skyra/env-utilities';
+import {
+    envParseArray,
+    envParseNumber,
+    envParseString,
+    setup,
+} from '@skyra/env-utilities';
 import { GatewayIntentBits, Partials, type ClientOptions } from 'discord.js';
 import { join } from 'node:path';
 import { BotLogger } from './lib/structures/bot-logger';
@@ -50,5 +55,12 @@ export const CLIENT_OPTIONS: ClientOptions = {
                     : LogLevel.Debug,
             join: '\n',
         }),
+    },
+    api: {
+        prefix: 'api/',
+        origin: '*',
+        listenOptions: {
+            port: envParseNumber('PORT'),
+        },
     },
 };

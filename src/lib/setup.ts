@@ -1,5 +1,7 @@
 import '@/config';
 import '@sapphire/plugin-subcommands/register';
+import '@sapphire/plugin-api/register';
+
 import {
     ApplicationCommandRegistries,
     RegisterBehavior,
