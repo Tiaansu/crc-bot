@@ -57,10 +57,4 @@ export const CLIENT_OPTIONS: ClientOptions = {
             join: '\n',
         }),
     },
-    api: {
-        origin: '*',
-        listenOptions: {
-            port: envParseNumber('PORT'),
-        },
-    },
 };

@@ -3,6 +3,8 @@ import { container } from '@sapphire/pieces';
 import { codeBlock, EmbedBuilder } from 'discord.js';
 import { loadConfig } from './config';
 import { BotClient } from './lib/bot-client';
+import server from './server';
+import { envParseNumber } from '@skyra/env-utilities';
 
 function handleErrors() {
     process.on('unhandledRejection', (reason) => {
@@ -55,3 +57,8 @@ async function main(): Promise<void> {
 void loadConfig();
 
 await main().catch(container.logger.error.bind(container.logger));
+
+export default {
+    fetch: server.fetch,
+    port: envParseNumber('PORT'),
+};
