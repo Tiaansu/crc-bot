@@ -6,7 +6,7 @@ import { userMention, type Message } from 'discord.js';
     event: Events.MessageCreate,
 })
 export class BotListener extends Listener {
-    private readonly MESSAGE_COUNT = 10;
+    private readonly MESSAGE_COUNT = 5;
     private lastUserMessageIndex = new Map<string, number>();
     private globalMessagesCount = 0;
 
