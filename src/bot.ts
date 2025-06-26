@@ -5,6 +5,7 @@ import { loadConfig } from './config';
 import { BotClient } from './lib/bot-client';
 import server from './server';
 import { envParseNumber } from '@skyra/env-utilities';
+import { Cron } from 'croner';
 
 function handleErrors() {
     process.on('unhandledRejection', (reason) => {
@@ -40,11 +41,24 @@ function handleErrors() {
     });
 }
 
+function startHeartbeat() {
+    new Cron('0 * * * * *', async () => {
+        const response = await fetch(
+            'https://crc-bot.onrender.com?from_local=true',
+        );
+
+        if (!response.ok) {
+            container.logger.error('Heartbeat failed');
+        }
+    });
+}
+
 async function main(): Promise<void> {
     const client = new BotClient();
 
     try {
         handleErrors();
+        startHeartbeat();
 
         await client.login();
     } catch (error) {
