@@ -3,6 +3,7 @@ export type ClientConfig = {
     ownerIds: string[];
     serverAdminIds: string[];
     tradingChannelId: string;
+    deletionChannelId: string;
     webhook: {
         id: string;
         token: string;

@@ -1,16 +1,11 @@
 import type { ClientConfig } from '@/types/config';
 import { rootFolder } from '@/utils/constants';
+import { LogLevel } from '@sapphire/framework';
 import { container } from '@sapphire/pieces';
-import {
-    envParseArray,
-    envParseNumber,
-    envParseString,
-    setup,
-} from '@skyra/env-utilities';
+import { envParseArray, envParseString, setup } from '@skyra/env-utilities';
 import { GatewayIntentBits, Partials, type ClientOptions } from 'discord.js';
 import { join } from 'node:path';
 import { BotLogger } from './lib/structures/bot-logger';
-import { LogLevel } from '@sapphire/framework';
 
 setup(join(rootFolder, '.env'));
 
@@ -25,6 +20,7 @@ export function loadConfig(): void {
         ownerIds: envParseArray('BOT_OWNER_IDS'),
         serverAdminIds: envParseArray('SERVER_ADMIN_IDS'),
         tradingChannelId: envParseString('TRADING_CHANNEL_ID'),
+        deletionChannelId: envParseString('DELETION_CHANNEL_ID'),
         webhook: {
             id: envParseString('DISCORD_WEBHOOK').split('/').at(-2)!,
             token: envParseString('DISCORD_WEBHOOK').split('/').at(-1)!,
