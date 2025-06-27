@@ -42,13 +42,19 @@ function handleErrors() {
 }
 
 function startHeartbeat() {
-    new Cron('0 * * * * *', async () => {
-        const response = await fetch(
-            'https://crc-bot.onrender.com?from_local=true',
-        );
+    new Cron('*/30 * * * * *', async () => {
+        try {
+            const response = await fetch(
+                'https://crc-bot.onrender.com?from_local=true',
+            );
 
-        if (!response.ok) {
-            container.logger.error('Heartbeat failed');
+            if (!response.ok) {
+                container.logger.error('Heartbeat failed');
+            }
+        } catch (error) {
+            container.logger.error(
+                `Failed to send heartbeat: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            );
         }
     });
 }
