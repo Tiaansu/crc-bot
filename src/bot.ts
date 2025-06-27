@@ -45,7 +45,7 @@ function startHeartbeat() {
     new Cron('*/30 * * * * *', async () => {
         try {
             const response = await fetch(
-                'https://crc-bot.onrender.com?from_local=true',
+                'https://crc-bot.onrender.com?from=local',
             );
 
             if (!response.ok) {
