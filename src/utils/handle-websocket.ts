@@ -148,8 +148,12 @@ export function handleWebsocket() {
     });
 
     function parser<T extends ZodTypeAny>(dataToParse: any[], parser: T) {
-        const { data, success } = parser.safeParse(dataToParse);
+        const { data, success, error } = parser.safeParse(dataToParse);
         if (!success) {
+            const errorMessage = Object.entries(error.flatten().fieldErrors)
+                .map(([key, errors]) => `${key}: ${(errors ?? []).join(', ')}`)
+                .join(' | ');
+            container.logger.error(errorMessage);
             return null;
         }
         return data as z.infer<T>;
