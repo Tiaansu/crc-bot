@@ -141,7 +141,7 @@ export function handleWebsocket() {
                 if (!data) return;
 
                 container.logger.info('Sending weather update.');
-                sendWeatherNotification(data);
+                // sendWeatherNotification(data);
                 break;
             }
         }
