@@ -8,7 +8,7 @@ import server from './server';
 import { handleWebsocket } from './utils/handle-websocket';
 
 function startHeartbeat() {
-    new Cron('*/30 * * * * *', async () => {
+    new Cron('0 */2 * * * *', async () => {
         try {
             const response = await fetch(
                 'https://crc-bot.onrender.com?from=local',
