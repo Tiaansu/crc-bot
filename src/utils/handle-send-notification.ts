@@ -346,7 +346,7 @@ export async function sendWeatherNotification(
         container
             .addTextDisplayComponents(
                 new TextDisplayBuilder().setContent(
-                    codeBlock(JSON.stringify(data, null, 2), 'json'),
+                    codeBlock('json', JSON.stringify(data, null, 2)),
                 ),
             )
             .addSeparatorComponents(separator);
