@@ -1,0 +1,1 @@
+ALTER TABLE "reaction_roles" ADD COLUMN "types" text NOT NULL;

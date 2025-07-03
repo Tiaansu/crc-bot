@@ -1,0 +1,1 @@
+ALTER TABLE "channels" RENAME COLUMN "channel_id" TO "webhook_url";

@@ -1,0 +1,1 @@
+ALTER TABLE "role_pickers" ADD COLUMN "channel_id" text NOT NULL;

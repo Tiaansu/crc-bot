@@ -7,10 +7,12 @@
         "@sapphire/eslint-config": "^5.0.6",
         "@sapphire/ts-config": "^5.0.1",
         "@types/bun": "latest",
+        "@types/common-tags": "^1.8.4",
         "@types/lodash": "^4.17.17",
         "@types/node": "^24.0.1",
         "@typescript-eslint/eslint-plugin": "^8.34.0",
         "@typescript-eslint/parser": "^8.34.0",
+        "drizzle-kit": "^0.31.4",
         "eslint": "^9.29.0",
         "eslint-config-prettier": "^10.1.5",
         "eslint-plugin-prettier": "^5.4.1",
@@ -21,6 +23,7 @@
         "typescript": "^5"
     },
     "dependencies": {
+        "@better-fetch/fetch": "^1.1.18",
         "@sapphire/decorators": "^6.2.0",
         "@sapphire/discord.js-utilities": "^7.3.3",
         "@sapphire/framework": "^5.3.6",
@@ -31,12 +34,16 @@
         "@sapphire/time-utilities": "^1.7.14",
         "@skyra/env-utilities": "^2.0.1",
         "colorette": "^2.0.20",
+        "common-tags": "^1.8.2",
         "croner": "^9.1.0",
         "cross-env": "^7.0.3",
         "discord.js": "^14.19.3",
         "dotenv": "^16.5.0",
+        "drizzle-orm": "^0.44.2",
         "hono": "^4.8.2",
-        "lodash": "^4.17.21"
+        "lodash": "^4.17.21",
+        "postgres": "^3.4.7",
+        "zod": "^3.25.67"
     },
     "scripts": {
         "start": "cross-env NODE_ENV=production bun src/bot.ts",

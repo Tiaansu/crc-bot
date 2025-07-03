@@ -1,0 +1,1 @@
+ALTER TABLE "reaction_roles" RENAME COLUMN "types" TO "items";

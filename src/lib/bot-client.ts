@@ -11,6 +11,7 @@ export class BotClient extends SapphireClient {
         super(CLIENT_OPTIONS);
 
         this.webhook = new WebhookClient(container.config.webhook);
+        this.registerCogs();
     }
 
     public override async login(token?: string): Promise<string> {
@@ -20,4 +21,6 @@ export class BotClient extends SapphireClient {
     public override async destroy(): Promise<void> {
         await super.destroy();
     }
+
+    private registerCogs() {}
 }

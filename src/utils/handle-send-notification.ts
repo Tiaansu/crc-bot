@@ -1,0 +1,416 @@
+import { db } from '@/lib/db';
+import { channels, roles } from '@/lib/db/schema';
+import type {
+    notificationSchema,
+    stockSchema,
+    weatherSchema,
+} from '@/lib/schemas/gag-ws';
+import { container } from '@sapphire/pieces';
+import { oneLineCommaListsAnd, stripIndents } from 'common-tags';
+import {
+    ApplicationEmoji,
+    bold,
+    codeBlock,
+    Collection,
+    ContainerBuilder,
+    formatEmoji,
+    heading,
+    HeadingLevel,
+    MessageFlags,
+    roleMention,
+    SeparatorBuilder,
+    SeparatorSpacingSize,
+    TextDisplayBuilder,
+    time,
+    WebhookClient,
+} from 'discord.js';
+import { and, eq, inArray } from 'drizzle-orm';
+import type { z } from 'zod';
+
+export async function sendStockNotification(data: {
+    seed_stock: z.infer<typeof stockSchema>;
+    gear_stock: z.infer<typeof stockSchema>;
+}) {
+    const { client } = container;
+    const emojis = await client.application?.emojis.fetch()!;
+
+    const channelsConfig = await getChannels('stock');
+
+    channelsConfig.forEach(async (g) => {
+        const webhook = new WebhookClient({
+            url: g.webhookUrl,
+        });
+
+        const itemIdsToFind = [...data.seed_stock, ...data.gear_stock].map(
+            (item) => item.item_id.replace("'", ''),
+        );
+
+        const rolesConfig = await db
+            .select()
+            .from(roles)
+            .where(
+                and(
+                    eq(roles.guildId, g.guildId),
+                    inArray(roles.forItem, itemIdsToFind),
+                ),
+            );
+
+        const _data = data.seed_stock ?? data.gear_stock;
+        const start_unix = _data[0].start_date_unix;
+        const end_unix = _data[0].end_date_unix;
+        const description = new TextDisplayBuilder().setContent(
+            `Here's the stock as of ${time(start_unix)} (${time(start_unix, 'R')}). It will reset at ${time(end_unix)} (${time(end_unix, 'R')}).`,
+        );
+
+        const { container, separator } = createContainerAndSeparator();
+
+        container
+            .addTextDisplayComponents(description)
+            .addSeparatorComponents(separator);
+
+        if (data.seed_stock.length > 0) {
+            const text = createStockText('Seed', data.seed_stock, emojis);
+            container
+                .addTextDisplayComponents(text)
+                .addSeparatorComponents(separator);
+        }
+
+        if (data.gear_stock.length > 0) {
+            const text = createStockText('Gear', data.gear_stock, emojis);
+            container
+                .addTextDisplayComponents(text)
+                .addSeparatorComponents(separator);
+        }
+
+        container.addTextDisplayComponents(
+            createFooter(rolesConfig.map((role) => role.roleId)),
+        );
+
+        sendWebhook(webhook, container);
+    });
+}
+
+export async function sendEggStockNotification(
+    data: z.infer<typeof stockSchema>,
+) {
+    const { client } = container;
+    const emojis = await client.application?.emojis.fetch()!;
+
+    const channelsConfig = await getChannels('egg');
+
+    const start_unix = data[0].start_date_unix;
+    const end_unix = data[0].end_date_unix;
+    const description = new TextDisplayBuilder().setContent(
+        `Here's the egg stock as of ${time(start_unix)} (${time(start_unix, 'R')}). It will reset at ${time(end_unix)} (${time(end_unix, 'R')}).`,
+    );
+
+    channelsConfig.forEach(async (g) => {
+        const webhook = new WebhookClient({
+            url: g.webhookUrl,
+        });
+
+        const itemIdsToFind = data.map((item) => item.item_id.replace("'", ''));
+
+        const rolesConfig = await db
+            .select()
+            .from(roles)
+            .where(
+                and(
+                    eq(roles.guildId, g.guildId),
+                    inArray(roles.forItem, itemIdsToFind),
+                ),
+            );
+
+        const { container, separator } = createContainerAndSeparator();
+
+        container
+            .addTextDisplayComponents(description)
+            .addSeparatorComponents(separator);
+
+        if (data.length > 0) {
+            const text = createStockText('Egg', data, emojis);
+            container
+                .addTextDisplayComponents(text)
+                .addSeparatorComponents(separator);
+        }
+
+        container.addTextDisplayComponents(
+            createFooter(rolesConfig.map((role) => role.roleId)),
+        );
+
+        sendWebhook(webhook, container);
+    });
+}
+
+export async function sendCosmeticStockNotification(
+    data: z.infer<typeof stockSchema>,
+) {
+    const { client } = container;
+    const emojis = await client.application?.emojis.fetch()!;
+
+    const channelsConfig = await getChannels('cosmetic');
+
+    const start_unix = data[0].start_date_unix;
+    const end_unix = data[0].end_date_unix;
+    const description = new TextDisplayBuilder().setContent(
+        `Here's the cosmetic stock as of ${time(start_unix)} (${time(start_unix, 'R')}). It will reset at ${time(end_unix)} (${time(end_unix, 'R')}).`,
+    );
+
+    channelsConfig.forEach(async (g) => {
+        const webhook = new WebhookClient({
+            url: g.webhookUrl,
+        });
+
+        const rolesConfig = await db
+            .select()
+            .from(roles)
+            .where(
+                and(
+                    eq(roles.guildId, g.guildId),
+                    eq(roles.forType, 'cosmetic'),
+                ),
+            );
+
+        const { container, separator } = createContainerAndSeparator();
+
+        container
+            .addTextDisplayComponents(description)
+            .addSeparatorComponents(separator);
+
+        if (data.length > 0) {
+            const text = createStockText('Cosmetic', data, emojis);
+            container
+                .addTextDisplayComponents(text)
+                .addSeparatorComponents(separator);
+        }
+
+        container.addTextDisplayComponents(
+            createFooter(rolesConfig.map((role) => role.roleId)),
+        );
+
+        sendWebhook(webhook, container);
+    });
+}
+
+export async function sendEventStockNotification(
+    data: z.infer<typeof stockSchema>,
+) {
+    const { client } = container;
+    const emojis = await client.application?.emojis.fetch()!;
+
+    const channelsConfig = await getChannels('event');
+
+    const start_unix = data[0].start_date_unix;
+    const end_unix = data[0].end_date_unix;
+    const description = new TextDisplayBuilder().setContent(
+        `Here's the event stock as of ${time(start_unix)} (${time(start_unix, 'R')}). It will reset at ${time(end_unix)} (${time(end_unix, 'R')}).`,
+    );
+
+    channelsConfig.forEach(async (g) => {
+        const webhook = new WebhookClient({
+            url: g.webhookUrl,
+        });
+
+        const rolesConfig = await db
+            .select()
+            .from(roles)
+            .where(
+                and(eq(roles.guildId, g.guildId), eq(roles.forType, 'event')),
+            );
+
+        const { container, separator } = createContainerAndSeparator();
+
+        container
+            .addTextDisplayComponents(description)
+            .addSeparatorComponents(separator);
+
+        if (data.length > 0) {
+            const text = createStockText('Event', data, emojis);
+            container
+                .addTextDisplayComponents(text)
+                .addSeparatorComponents(separator);
+        }
+
+        container.addTextDisplayComponents(
+            createFooter(rolesConfig.map((role) => role.roleId)),
+        );
+
+        sendWebhook(webhook, container);
+    });
+}
+
+export async function sendTravelingMerchantStockNotification(
+    data: z.infer<typeof stockSchema>,
+) {
+    const { client } = container;
+    const emojis = await client.application?.emojis.fetch()!;
+
+    const channelsConfig = await getChannels('travelingmerchant');
+
+    const start_unix = data[0].start_date_unix;
+    const end_unix = data[0].end_date_unix;
+    const description = new TextDisplayBuilder().setContent(
+        `Here's the traveling merchant stock as of ${time(start_unix)} (${time(start_unix, 'R')}). It will reset at ${time(end_unix)} (${time(end_unix, 'R')}).`,
+    );
+
+    channelsConfig.forEach(async (g) => {
+        const webhook = new WebhookClient({
+            url: g.webhookUrl,
+        });
+
+        const rolesConfig = await db
+            .select()
+            .from(roles)
+            .where(
+                and(
+                    eq(roles.guildId, g.guildId),
+                    eq(roles.forType, 'travelingmerchant'),
+                ),
+            );
+
+        const { container, separator } = createContainerAndSeparator();
+
+        container
+            .addTextDisplayComponents(description)
+            .addSeparatorComponents(separator);
+
+        if (data.length > 0) {
+            const text = createStockText('Traveling Merchant', data, emojis);
+            container
+                .addTextDisplayComponents(text)
+                .addSeparatorComponents(separator);
+        }
+
+        container.addTextDisplayComponents(
+            createFooter(rolesConfig.map((role) => role.roleId)),
+        );
+
+        sendWebhook(webhook, container);
+    });
+}
+
+export async function sendNotification(
+    data: z.infer<typeof notificationSchema>,
+) {
+    const startTimestamp = data[0].timestamp;
+    const endTimestamp = data[0].end_timestamp;
+    const description = new TextDisplayBuilder().setContent(
+        stripIndents`
+            ${heading(data[0].message, HeadingLevel.Two)}
+
+            ${startTimestamp ? `${time(startTimestamp)} (${time(startTimestamp, 'R')})` : ''}
+            ${endTimestamp ? `${time(endTimestamp)} (${time(endTimestamp, 'R')})` : ''}
+        `,
+    );
+
+    const channelsConfig = await getChannels('notification');
+    channelsConfig.forEach(async (g) => {
+        const webhook = new WebhookClient({
+            url: g.webhookUrl,
+        });
+
+        const rolesConfig = await db
+            .select()
+            .from(roles)
+            .where(
+                and(
+                    eq(roles.guildId, g.guildId),
+                    eq(roles.forType, 'notification'),
+                ),
+            );
+
+        const { container, separator } = createContainerAndSeparator();
+
+        container
+            .addTextDisplayComponents(description)
+            .addSeparatorComponents(separator)
+            .addTextDisplayComponents(
+                createFooter(rolesConfig.map((role) => role.roleId)),
+            );
+
+        sendWebhook(webhook, container);
+    });
+}
+
+export async function sendWeatherNotification(
+    data: z.infer<typeof weatherSchema>,
+) {
+    const channelsConfig = await getChannels('weather');
+    channelsConfig.forEach(async (g) => {
+        const webhook = new WebhookClient({
+            url: g.webhookUrl,
+        });
+
+        const { container, separator } = createContainerAndSeparator();
+
+        container
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent(
+                    codeBlock(JSON.stringify(data, null, 2), 'json'),
+                ),
+            )
+            .addSeparatorComponents(separator);
+
+        sendWebhook(webhook, container);
+    });
+}
+
+// helpers
+
+function createContainerAndSeparator() {
+    const container = new ContainerBuilder();
+    const separator = new SeparatorBuilder().setSpacing(
+        SeparatorSpacingSize.Large,
+    );
+
+    return { container, separator };
+}
+
+function createFooter(roleIds: string[]) {
+    const roleMentions = oneLineCommaListsAnd`${roleIds.map((id) => roleMention(id))}`;
+    const footer = new TextDisplayBuilder().setContent(stripIndents`
+            ${roleMentions}
+
+            -# Powered by JStudio | Made with ❤️ by Tiaansu
+        `);
+    return footer;
+}
+
+function createStockText(
+    label: string,
+    data: z.infer<typeof stockSchema>,
+    emojis: Collection<string, ApplicationEmoji>,
+) {
+    const arr = data.map((item) => {
+        const emoji = getEmoji(emojis, item.item_id.replace("'", ''));
+        return `${formatEmoji(emoji.id)} ${item.display_name} ${bold(`x${item.quantity}`)}`;
+    });
+
+    const text = new TextDisplayBuilder().setContent(stripIndents`
+        # ${label}
+
+        ${arr.join('\n')}
+    `);
+    return text;
+}
+
+function getEmoji(emojis: Collection<string, ApplicationEmoji>, name: string) {
+    const fallback = emojis.find((emoji) => emoji.name === 'fallback')!;
+    return emojis.find((emoji) => emoji.name === name) || fallback;
+}
+
+async function sendWebhook(
+    webhook: WebhookClient,
+    container: ContainerBuilder,
+) {
+    return await webhook.send({
+        components: [container],
+        flags: MessageFlags.IsComponentsV2,
+    });
+}
+
+async function getChannels(type: string) {
+    return await db.query.channels.findMany({
+        where: eq(channels.forType, type),
+    });
+}

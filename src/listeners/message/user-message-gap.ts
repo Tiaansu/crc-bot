@@ -1,5 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
+import { envParseString } from '@skyra/env-utilities';
 import { userMention, type Message } from 'discord.js';
 
 @ApplyOptions<Listener.Options>({
@@ -11,6 +12,7 @@ export class BotListener extends Listener {
     private globalMessagesCount = 0;
 
     public async run(message: Message) {
+        if (envParseString('NODE_ENV') === 'development') return;
         if (message.author.bot) return;
         if (message.channel.id !== this.container.config.tradingChannelId)
             return;
