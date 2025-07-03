@@ -9,6 +9,7 @@ import type { z, ZodTypeAny } from 'zod';
 import {
     sendCosmeticStockNotification,
     sendEggStockNotification,
+    sendEventStockNotification,
     sendNotification,
     sendStockNotification,
     sendWeatherNotification,
@@ -74,6 +75,7 @@ export function handleWebsocket() {
             return;
         }
         const key: string = keys[0];
+        container.logger.info(`Received data for ${key}.`);
 
         if (processingTimer) {
             clearTimeout(processingTimer);
@@ -106,6 +108,7 @@ export function handleWebsocket() {
                 const data = parser(parsedData[key], stockSchema);
                 if (!data) return;
 
+                container.logger.info('Sending egg stock update.');
                 sendEggStockNotification(data);
                 break;
             }
@@ -113,6 +116,7 @@ export function handleWebsocket() {
                 const data = parser(parsedData[key], stockSchema);
                 if (!data) return;
 
+                container.logger.info('Sending cosmetic stock update.');
                 sendCosmeticStockNotification(data);
                 break;
             }
@@ -120,12 +124,15 @@ export function handleWebsocket() {
                 const data = parser(parsedData[key], stockSchema);
                 if (!data) return;
 
+                container.logger.info('Sending event shop stock update.');
+                sendEventStockNotification(data);
                 break;
             }
             case 'notification': {
                 const data = parser(parsedData[key], notificationSchema);
                 if (!data) return;
 
+                container.logger.info('Sending notification.');
                 sendNotification(data);
                 break;
             }
@@ -133,6 +140,7 @@ export function handleWebsocket() {
                 const data = parser(parsedData[key], weatherSchema);
                 if (!data) return;
 
+                container.logger.info('Sending weather update.');
                 sendWeatherNotification(data);
                 break;
             }
