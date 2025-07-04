@@ -24,9 +24,9 @@ export function handleWebsocket() {
         container.logger.info(`Connected to Grow A Garden websocket server.`);
     });
 
-    ws.addEventListener('close', () =>
+    ws.addEventListener('close', (e) =>
         container.logger.info(
-            `Disconnected from Grow A Garden websocket server.`,
+            `Disconnected from Grow A Garden websocket server. ${e.code} ${e.reason}`,
         ),
     );
 
