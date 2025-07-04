@@ -12,27 +12,77 @@ import {
     sendEventStockNotification,
     sendNotification,
     sendStockNotification,
-    sendWeatherNotification,
 } from './handle-send-notification';
 
+const WS_URL =
+    'wss://websocket.joshlei.com/growagarden?user_id=1383283124376572086';
+const RECONNECT_INTERVAL = 5_000;
+const CONNECT_TIMEOUT = 10_000;
+
+let ws: WebSocket | null = null;
+let reconnectTimeout: NodeJS.Timeout | null = null;
+let connectTimeout: NodeJS.Timeout | null = null;
+
 export function handleWebsocket() {
-    const ws = new WebSocket(
-        'wss://websocket.joshlei.com/growagarden?user_id=1383283124376572086',
-    );
+    container.logger.info('Attempting to connect to WebSocket server...');
 
-    ws.addEventListener('open', () => {
-        container.logger.info(`Connected to Grow A Garden websocket server.`);
-    });
+    ws = new WebSocket(WS_URL);
+    let isConnected = false;
 
-    ws.addEventListener('close', (e) =>
-        container.logger.info(
-            `Disconnected from Grow A Garden websocket server. ${e.code} ${e.reason}`,
-        ),
-    );
+    const cleanup = () => {
+        if (ws) {
+            ws.onopen = null;
+            ws.onclose = null;
+            ws.onmessage = null;
+            ws.onerror = null;
+            ws = null;
+        }
+    };
 
-    ws.addEventListener('error', (error) =>
-        container.logger.error(`WebSocket error: ${error}`),
-    );
+    ws.onopen = () => {
+        isConnected = true;
+        container.logger.info('Connected to WebSocket server.');
+
+        if (reconnectTimeout) {
+            clearTimeout(reconnectTimeout);
+            reconnectTimeout = null;
+        }
+        if (connectTimeout) {
+            clearTimeout(connectTimeout);
+            connectTimeout = null;
+        }
+    };
+
+    ws.onclose = (e) => {
+        container.logger.warn(
+            `Disconnected to WebSocket server. Reason: ${e.reason}`,
+        );
+        if (connectTimeout) {
+            clearTimeout(connectTimeout);
+            connectTimeout = null;
+        }
+        scheduleReconnect();
+    };
+
+    ws.onerror = (error) => {
+        container.logger.error(`WebSocket error: ${error}`);
+        if (!isConnected) {
+            container.logger.warn(
+                "Connection failed before 'open'. Scheduling reconnect...",
+            );
+            scheduleReconnect();
+        }
+    };
+
+    connectTimeout = setTimeout(() => {
+        if (ws?.readyState !== WebSocket.OPEN) {
+            container.logger.warn(
+                'Connection to WebSocket timeout. Forcing reconnect...',
+            );
+            cleanup();
+            scheduleReconnect();
+        }
+    }, CONNECT_TIMEOUT);
 
     let stockUpdateBuffer: {
         seed_stock: z.infer<typeof stockSchema> | null;
@@ -59,7 +109,7 @@ export function handleWebsocket() {
         processingTimer = null;
     }
 
-    ws.addEventListener('message', (event) => {
+    ws.onmessage = (event) => {
         const { data: parsedData, success } = generalDataSchema.safeParse(
             JSON.parse(event.data),
         );
@@ -145,7 +195,7 @@ export function handleWebsocket() {
                 break;
             }
         }
-    });
+    };
 
     function parser<T extends ZodTypeAny>(dataToParse: any[], parser: T) {
         const { data, success, error } = parser.safeParse(dataToParse);
@@ -157,5 +207,14 @@ export function handleWebsocket() {
             return null;
         }
         return data as z.infer<T>;
+    }
+}
+
+function scheduleReconnect() {
+    if (!reconnectTimeout) {
+        reconnectTimeout = setTimeout(() => {
+            reconnectTimeout = null;
+            handleWebsocket();
+        }, RECONNECT_INTERVAL);
     }
 }
