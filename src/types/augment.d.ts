@@ -13,6 +13,7 @@ declare module '@sapphire/pieces' {
     interface Container {
         config: ClientConfig;
         guild: Guild;
+        socket: WebSocket;
     }
 }
 
