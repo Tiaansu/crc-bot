@@ -3,9 +3,6 @@ name: Migrate
 on:
   workflow_dispatch:
   push:
-    paths:
-      - src/lib/db/schema.ts
-      - drizzle
 
 jobs:
   migrate:
