@@ -64,7 +64,7 @@ export function handleWebsocket() {
 
     function processAndResetStockBuffer() {
         container.logger.info(
-            `[DEBUG] !pendingStockUpdates.seed_stock ${!pendingStockUpdates.seed_stock} | !pendingStockUpdates.gear_stock ${!pendingStockUpdates.seed_stock} | ${!pendingStockUpdates.seed_stock && !pendingStockUpdates.gear_stock}`,
+            `[DEBUG] !pendingStockUpdates.seed_stock ${!pendingStockUpdates.seed_stock} | !pendingStockUpdates.gear_stock ${!pendingStockUpdates.gear_stock} | ${!pendingStockUpdates.seed_stock && !pendingStockUpdates.gear_stock}`,
         );
         if (
             !pendingStockUpdates.seed_stock &&
