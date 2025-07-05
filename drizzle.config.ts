@@ -2,7 +2,7 @@ import { defineConfig } from 'drizzle-kit';
 import { config } from 'dotenv';
 
 config({
-    path: '.env',
+    path: './.env',
 });
 
 console.log(process.env.DATABASE_URL);

@@ -20,7 +20,7 @@ jobs:
 
       - name: DEBUG
         run: |
-          find . -type f -name ".env"
+          find . -type f -name "drizzle.config.ts"
 
       - name: Install dependencies
         run: |
