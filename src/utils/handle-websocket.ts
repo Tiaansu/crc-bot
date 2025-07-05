@@ -43,7 +43,15 @@ export function handleWebsocket() {
     });
 
     // ---
-    let stockUpdateBuffer: {
+    let lastSentStockState: {
+        seed_stock: z.infer<typeof stockSchema>;
+        gear_stock: z.infer<typeof stockSchema>;
+    } = {
+        seed_stock: [],
+        gear_stock: [],
+    };
+
+    let pendingStockUpdates: {
         seed_stock: z.infer<typeof stockSchema> | null;
         gear_stock: z.infer<typeof stockSchema> | null;
     } = {
@@ -52,29 +60,27 @@ export function handleWebsocket() {
     };
 
     let processingTimer: NodeJS.Timeout | null = null;
-    const DEBOUNCE_DELAY_MS = 250;
+    const DEBOUNCE_DELAY_MS = 750;
 
     function processAndResetStockBuffer() {
-        if (!stockUpdateBuffer.seed_stock && !stockUpdateBuffer.gear_stock) {
+        if (
+            !pendingStockUpdates.seed_stock &&
+            !pendingStockUpdates.gear_stock
+        ) {
             return;
         }
 
         const stockPayload = {
-            seed_stock: stockUpdateBuffer.seed_stock || [],
-            gear_stock: stockUpdateBuffer.gear_stock || [],
+            seed_stock:
+                pendingStockUpdates.seed_stock ?? lastSentStockState.seed_stock,
+            gear_stock:
+                pendingStockUpdates.gear_stock ?? lastSentStockState.gear_stock,
         };
 
-        if (
-            stockPayload.seed_stock.length > 0 ||
-            stockPayload.gear_stock.length > 0
-        ) {
-            sendStockNotification(stockPayload);
-        } else {
-            container.logger.warn(
-                'All stock arrays are empty, skipping notification.',
-            );
-        }
-        stockUpdateBuffer = { seed_stock: null, gear_stock: null };
+        sendStockNotification(stockPayload);
+        lastSentStockState = stockPayload;
+
+        pendingStockUpdates = { seed_stock: null, gear_stock: null };
         processingTimer = null;
     }
 
@@ -105,7 +111,7 @@ export function handleWebsocket() {
                 const data = parser(parsedData[key], stockSchema);
                 if (!data) return;
 
-                stockUpdateBuffer.seed_stock = data;
+                pendingStockUpdates.seed_stock = data;
                 processingTimer = setTimeout(
                     processAndResetStockBuffer,
                     DEBOUNCE_DELAY_MS,
@@ -116,7 +122,7 @@ export function handleWebsocket() {
                 const data = parser(parsedData[key], stockSchema);
                 if (!data) return;
 
-                stockUpdateBuffer.gear_stock = data;
+                pendingStockUpdates.gear_stock = data;
                 processingTimer = setTimeout(
                     processAndResetStockBuffer,
                     DEBOUNCE_DELAY_MS,
