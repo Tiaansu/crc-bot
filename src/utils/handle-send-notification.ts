@@ -12,19 +12,12 @@ import {
     ApplicationEmoji,
     bold,
     Collection,
-    ContainerBuilder,
+    EmbedBuilder,
     formatEmoji,
-    heading,
-    HeadingLevel,
-    MessageFlags,
     roleMention,
-    SectionBuilder,
-    SeparatorBuilder,
-    SeparatorSpacingSize,
-    TextDisplayBuilder,
-    ThumbnailBuilder,
     time,
     WebhookClient,
+    type APIEmbedField,
     type APIMessage,
 } from 'discord.js';
 import { and, eq, inArray } from 'drizzle-orm';
@@ -55,6 +48,10 @@ export async function sendStockNotification(data: {
         return;
     }
 
+    const startUnix = referenceData[0].start_date_unix;
+    const endUnix = referenceData[0].end_date_unix;
+    const description = `Here's the stock as of ${time(startUnix)} (${time(startUnix, 'R')}). It will reset at ${time(endUnix)} (${time(endUnix, 'R')}).`;
+
     channelsConfig.forEach(async (g) => {
         const webhook = new WebhookClient({
             url: g.webhookUrl,
@@ -75,37 +72,19 @@ export async function sendStockNotification(data: {
                 ),
             );
 
-        const start_unix = referenceData[0].start_date_unix;
-        const end_unix = referenceData[0].end_date_unix;
-        const description = new TextDisplayBuilder().setContent(
-            `Here's the stock as of ${time(start_unix)} (${time(start_unix, 'R')}). It will reset at ${time(end_unix)} (${time(end_unix, 'R')}).`,
-        );
-
-        const { container, separator } = createContainerAndSeparator();
-
-        container
-            .addTextDisplayComponents(description)
-            .addSeparatorComponents(separator);
+        const embed = createEmbed('Stock', description);
 
         if (data.seed_stock.length > 0) {
             const text = createStockText('Seed', data.seed_stock, emojis);
-            container
-                .addTextDisplayComponents(text)
-                .addSeparatorComponents(separator);
+            embed.addFields(text);
         }
-
         if (data.gear_stock.length > 0) {
             const text = createStockText('Gear', data.gear_stock, emojis);
-            container
-                .addTextDisplayComponents(text)
-                .addSeparatorComponents(separator);
+            embed.addFields(text);
         }
 
-        container.addTextDisplayComponents(
-            createFooter(rolesConfig.map((role) => role.roleId)),
-        );
-
-        sendWebhook(webhook, container);
+        const roleIds = rolesConfig.map((r) => r.roleId);
+        sendWebhook(webhook, embed, roleIds);
     });
 }
 
@@ -125,11 +104,9 @@ export async function sendEggStockNotification(
 
     const channelsConfig = await getChannels('egg');
 
-    const start_unix = data[0].start_date_unix;
-    const end_unix = data[0].end_date_unix;
-    const description = new TextDisplayBuilder().setContent(
-        `Here's the egg stock as of ${time(start_unix)} (${time(start_unix, 'R')}). It will reset at ${time(end_unix)} (${time(end_unix, 'R')}).`,
-    );
+    const startUnix = data[0].start_date_unix;
+    const endUnix = data[0].end_date_unix;
+    const description = `Here's the egg stock as of ${time(startUnix)} (${time(startUnix, 'R')}). It will reset at ${time(endUnix)} (${time(endUnix, 'R')}).`;
 
     channelsConfig.forEach(async (g) => {
         const webhook = new WebhookClient({
@@ -148,24 +125,15 @@ export async function sendEggStockNotification(
                 ),
             );
 
-        const { container, separator } = createContainerAndSeparator();
-
-        container
-            .addTextDisplayComponents(description)
-            .addSeparatorComponents(separator);
+        const embed = createEmbed('Egg', description);
 
         if (data.length > 0) {
             const text = createStockText('Egg', data, emojis);
-            container
-                .addTextDisplayComponents(text)
-                .addSeparatorComponents(separator);
+            embed.addFields(text);
         }
 
-        container.addTextDisplayComponents(
-            createFooter(rolesConfig.map((role) => role.roleId)),
-        );
-
-        sendWebhook(webhook, container);
+        const roleIds = rolesConfig.map((r) => r.roleId);
+        sendWebhook(webhook, embed, roleIds);
     });
 }
 
@@ -185,11 +153,9 @@ export async function sendCosmeticStockNotification(
 
     const channelsConfig = await getChannels('cosmetic');
 
-    const start_unix = data[0].start_date_unix;
-    const end_unix = data[0].end_date_unix;
-    const description = new TextDisplayBuilder().setContent(
-        `Here's the cosmetic stock as of ${time(start_unix)} (${time(start_unix, 'R')}). It will reset at ${time(end_unix)} (${time(end_unix, 'R')}).`,
-    );
+    const startUnix = data[0].start_date_unix;
+    const endUnix = data[0].end_date_unix;
+    const description = `Here's the cosmetic stock as of ${time(startUnix)} (${time(startUnix, 'R')}). It will reset at ${time(endUnix)} (${time(endUnix, 'R')}).`;
 
     channelsConfig.forEach(async (g) => {
         const webhook = new WebhookClient({
@@ -206,24 +172,15 @@ export async function sendCosmeticStockNotification(
                 ),
             );
 
-        const { container, separator } = createContainerAndSeparator();
-
-        container
-            .addTextDisplayComponents(description)
-            .addSeparatorComponents(separator);
+        const embed = createEmbed('Cosmetic', description);
 
         if (data.length > 0) {
             const text = createStockText('Cosmetic', data, emojis);
-            container
-                .addTextDisplayComponents(text)
-                .addSeparatorComponents(separator);
+            embed.addFields(text);
         }
 
-        container.addTextDisplayComponents(
-            createFooter(rolesConfig.map((role) => role.roleId)),
-        );
-
-        sendWebhook(webhook, container);
+        const roleIds = rolesConfig.map((r) => r.roleId);
+        sendWebhook(webhook, embed, roleIds);
     });
 }
 
@@ -243,11 +200,9 @@ export async function sendEventStockNotification(
 
     const channelsConfig = await getChannels('event');
 
-    const start_unix = data[0].start_date_unix;
-    const end_unix = data[0].end_date_unix;
-    const description = new TextDisplayBuilder().setContent(
-        `Here's the event stock as of ${time(start_unix)} (${time(start_unix, 'R')}). It will reset at ${time(end_unix)} (${time(end_unix, 'R')}).`,
-    );
+    const startUnix = data[0].start_date_unix;
+    const endUnix = data[0].end_date_unix;
+    const description = `Here's the event stock as of ${time(startUnix)} (${time(startUnix, 'R')}). It will reset at ${time(endUnix)} (${time(endUnix, 'R')}).`;
 
     channelsConfig.forEach(async (g) => {
         const webhook = new WebhookClient({
@@ -261,24 +216,15 @@ export async function sendEventStockNotification(
                 and(eq(roles.guildId, g.guildId), eq(roles.forType, 'event')),
             );
 
-        const { container, separator } = createContainerAndSeparator();
-
-        container
-            .addTextDisplayComponents(description)
-            .addSeparatorComponents(separator);
+        const embed = createEmbed('Event', description);
 
         if (data.length > 0) {
             const text = createStockText('Event', data, emojis);
-            container
-                .addTextDisplayComponents(text)
-                .addSeparatorComponents(separator);
+            embed.addFields(text);
         }
 
-        container.addTextDisplayComponents(
-            createFooter(rolesConfig.map((role) => role.roleId)),
-        );
-
-        sendWebhook(webhook, container);
+        const roleIds = rolesConfig.map((r) => r.roleId);
+        sendWebhook(webhook, embed, roleIds);
     });
 }
 
@@ -298,11 +244,9 @@ export async function sendTravelingMerchantStockNotification(
 
     const channelsConfig = await getChannels('travelingmerchant');
 
-    const start_unix = data[0].start_date_unix;
-    const end_unix = data[0].end_date_unix;
-    const description = new TextDisplayBuilder().setContent(
-        `Here's the traveling merchant stock as of ${time(start_unix)} (${time(start_unix, 'R')}). It will reset at ${time(end_unix)} (${time(end_unix, 'R')}).`,
-    );
+    const startUnix = data[0].start_date_unix;
+    const endUnix = data[0].end_date_unix;
+    const description = `Here's the traveling merchant stock as of ${time(startUnix)} (${time(startUnix, 'R')}). It will reset at ${time(endUnix)} (${time(endUnix, 'R')}).`;
 
     channelsConfig.forEach(async (g) => {
         const webhook = new WebhookClient({
@@ -319,24 +263,15 @@ export async function sendTravelingMerchantStockNotification(
                 ),
             );
 
-        const { container, separator } = createContainerAndSeparator();
-
-        container
-            .addTextDisplayComponents(description)
-            .addSeparatorComponents(separator);
+        const embed = createEmbed('Traveling Merchant', description);
 
         if (data.length > 0) {
             const text = createStockText('Traveling Merchant', data, emojis);
-            container
-                .addTextDisplayComponents(text)
-                .addSeparatorComponents(separator);
+            embed.addFields(text);
         }
 
-        container.addTextDisplayComponents(
-            createFooter(rolesConfig.map((role) => role.roleId)),
-        );
-
-        sendWebhook(webhook, container);
+        const roleIds = rolesConfig.map((r) => r.roleId);
+        sendWebhook(webhook, embed, roleIds);
     });
 }
 
@@ -351,16 +286,19 @@ export async function sendNotification(
         return;
     }
 
+    const now = Math.floor(Date.now() / 1000);
     const startTimestamp = data[0].timestamp;
-    const endTimestamp = data[0].end_timestamp;
-    const description = new TextDisplayBuilder().setContent(
-        stripIndents`
-            ${heading(data[0].message, HeadingLevel.Two)}
+    // ignore 1 minute old notifications
+    if (now - startTimestamp > 60 * 1000) {
+        container.logger.info('Notification is too old. Ignoring.');
+        return;
+    }
 
-            ${startTimestamp ? `${time(startTimestamp)} (${time(startTimestamp, 'R')})` : ''}
-            ${endTimestamp ? `${time(endTimestamp)} (${time(endTimestamp, 'R')})` : ''}
-        `,
-    );
+    const endTimestamp = data[0].end_timestamp;
+    const description = stripIndents`
+        ${startTimestamp ? `${time(startTimestamp)} (${time(startTimestamp, 'R')})` : ''}
+        ${endTimestamp ? `${time(endTimestamp)} (${time(endTimestamp, 'R')})` : ''}
+    `;
 
     const channelsConfig = await getChannels('notification');
     channelsConfig.forEach(async (g) => {
@@ -378,16 +316,10 @@ export async function sendNotification(
                 ),
             );
 
-        const { container, separator } = createContainerAndSeparator();
+        const embed = createEmbed(data[0].message, description);
 
-        container
-            .addTextDisplayComponents(description)
-            .addSeparatorComponents(separator)
-            .addTextDisplayComponents(
-                createFooter(rolesConfig.map((role) => role.roleId)),
-            );
-
-        sendWebhook(webhook, container);
+        const roleIds = rolesConfig.map((r) => r.roleId);
+        sendWebhook(webhook, embed, roleIds);
     });
 }
 
@@ -401,9 +333,6 @@ export async function sendWeatherNotification(
         );
         return;
     }
-
-    const { client } = container;
-    const emojis = await client.application?.emojis.fetch()!;
 
     const weatherInfos = await $fetch('/growagarden/info?type=weather', {
         headers: {
@@ -445,37 +374,30 @@ export async function sendWeatherNotification(
             );
             if (!weatherInfo) return;
 
-            const { container, separator } = createContainerAndSeparator();
-            const emoji = getEmoji(emojis, weather.weather_id);
-
-            const text = new TextDisplayBuilder().setContent(stripIndents`
-                ${heading(`${emoji} ${weatherInfo.display_name}`, HeadingLevel.Two)}
-
+            const description = stripIndents`
                 Starts at ${time(weather.start_duration_unix)} (${time(weather.start_duration_unix, 'R')}) until ${time(weather.end_duration_unix)} (${time(weather.end_duration_unix, 'R')}).
 
                 ${weatherInfo.description}
-            `);
-            const image = new ThumbnailBuilder()
-                .setURL(weatherInfo.icon)
-                .setDescription(weatherInfo.display_name);
-            const section = new SectionBuilder()
-                .addTextDisplayComponents(text)
-                .setThumbnailAccessory(image);
+            `;
 
-            container
-                .addSectionComponents(section)
-                .addSeparatorComponents(separator);
+            const embed = createEmbed(
+                weatherInfo.display_name,
+                description,
+            ).setThumbnail(weatherInfo.icon);
 
             const roleConfig = rolesConfig.find(
                 (role) => role.forItem === weather.weather_id,
             );
             if (roleConfig) {
-                container.addTextDisplayComponents(
-                    createFooter([roleConfig.roleId]),
-                );
             }
 
-            promise.push(sendWebhook(webhook, container));
+            promise.push(
+                sendWebhook(
+                    webhook,
+                    embed,
+                    roleConfig ? [roleConfig.roleId] : [],
+                ),
+            );
         });
 
         await Promise.all(promise);
@@ -484,41 +406,30 @@ export async function sendWeatherNotification(
 
 // helpers
 
-function createContainerAndSeparator() {
-    const container = new ContainerBuilder();
-    const separator = new SeparatorBuilder().setSpacing(
-        SeparatorSpacingSize.Large,
-    );
-
-    return { container, separator };
-}
-
-function createFooter(roleIds: string[]) {
-    const roleMentions = oneLineCommaListsAnd`${roleIds.map((id) => roleMention(id))}`;
-    const footer = new TextDisplayBuilder().setContent(stripIndents`
-            ${roleMentions}
-
-            -# Powered by JStudio | Made with ❤️ by Tiaansu
-        `);
-    return footer;
+function createEmbed(title: string, description: string) {
+    return new EmbedBuilder()
+        .setTitle(title)
+        .setDescription(description)
+        .setFooter({
+            text: 'Powered by JStudio | Made with ❤️ by Tiaansu',
+        });
 }
 
 function createStockText(
     label: string,
     data: z.infer<typeof stockSchema>,
     emojis: Collection<string, ApplicationEmoji>,
-) {
+): APIEmbedField {
     const arr = data.map((item) => {
         const emoji = getEmoji(emojis, item.item_id.replace("'", ''));
         return `${formatEmoji(emoji.id)} ${item.display_name} ${bold(`x${item.quantity}`)}`;
     });
 
-    const text = new TextDisplayBuilder().setContent(stripIndents`
-        # ${label}
-
-        ${arr.join('\n')}
-    `);
-    return text;
+    return {
+        name: label,
+        value: arr.join('\n'),
+        inline: true,
+    };
 }
 
 function getEmoji(emojis: Collection<string, ApplicationEmoji>, name: string) {
@@ -528,11 +439,12 @@ function getEmoji(emojis: Collection<string, ApplicationEmoji>, name: string) {
 
 async function sendWebhook(
     webhook: WebhookClient,
-    container: ContainerBuilder,
+    embed: EmbedBuilder,
+    roleIds: string[],
 ) {
     return await webhook.send({
-        components: [container],
-        flags: MessageFlags.IsComponentsV2,
+        content: oneLineCommaListsAnd`${roleIds.map((id) => roleMention(id))}`,
+        embeds: [embed],
     });
 }
 
