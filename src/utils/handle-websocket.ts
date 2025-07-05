@@ -15,7 +15,7 @@ import {
     sendWeatherNotification,
 } from './handle-send-notification';
 
-const WS_URL = `wss://websocket.joshlei.com/growagarden?user_id=1383283124376572086${process.env.NODE_ENV === 'development' ? '_debug' : ''}`;
+const WS_URL = `wss://websocket.joshlei.com/growagarden?user_id=1383283124376572086${process.env.NODE_ENV === 'development' ? '_debug' : Math.random().toString()}`;
 const HEARTBEAT_CHECK = 5_000;
 
 export function handleWebsocket() {
