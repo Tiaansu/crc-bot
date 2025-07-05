@@ -1,7 +1,7 @@
 import type { ArrayString, NumberString } from '@skyra/env-utilities';
 import type { ClientConfig } from './config';
 import type WebhookErrorBuilder from '@/lib/structures/webhook-error-builder';
-import type { Guild } from 'discord.js';
+import type { Collection, Guild } from 'discord.js';
 
 declare module 'discord.js' {
     interface Client {
@@ -14,6 +14,7 @@ declare module '@sapphire/pieces' {
         config: ClientConfig;
         guild: Guild;
         socket: WebSocket;
+        weatherStartUnix: Collection<string, number>;
     }
 }
 

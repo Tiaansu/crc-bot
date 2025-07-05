@@ -1,7 +1,7 @@
 import { CLIENT_OPTIONS } from '@/config';
 import { Enumerable } from '@sapphire/decorators';
 import { container, SapphireClient } from '@sapphire/framework';
-import { WebhookClient } from 'discord.js';
+import { Collection, WebhookClient } from 'discord.js';
 
 export class BotClient extends SapphireClient {
     @Enumerable(false)
@@ -11,6 +11,7 @@ export class BotClient extends SapphireClient {
         super(CLIENT_OPTIONS);
 
         this.webhook = new WebhookClient(container.config.webhook);
+        this.initializeCollections();
         this.registerCogs();
     }
 
@@ -23,6 +24,10 @@ export class BotClient extends SapphireClient {
         if (container.socket.readyState === WebSocket.OPEN) {
             container.socket.close();
         }
+    }
+
+    private initializeCollections() {
+        container.weatherStartUnix = new Collection();
     }
 
     private registerCogs() {}

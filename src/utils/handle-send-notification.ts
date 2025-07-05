@@ -410,7 +410,19 @@ export async function sendWeatherNotification(
             'Jstudio-key': 'jstudio',
         },
     });
-    const activeWeathers = data.filter((item) => item.active);
+    const activeWeathers = data.filter((item) => {
+        const startUnix = container.weatherStartUnix.get(item.weather_id);
+        const isItemActive = item.active;
+
+        return startUnix !== item.start_duration_unix || isItemActive;
+    });
+
+    activeWeathers.forEach((weather) => {
+        container.weatherStartUnix.set(
+            weather.weather_id,
+            weather.start_duration_unix,
+        );
+    });
 
     const channelsConfig = await getChannels('weather');
     channelsConfig.forEach(async (g) => {
