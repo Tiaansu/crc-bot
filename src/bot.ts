@@ -1,48 +1,13 @@
 import '@/lib/setup';
 import { container } from '@sapphire/pieces';
-import { codeBlock, EmbedBuilder } from 'discord.js';
+import { Cron } from 'croner';
 import { loadConfig } from './config';
 import { BotClient } from './lib/bot-client';
 import server from './server';
-import { envParseNumber } from '@skyra/env-utilities';
-import { Cron } from 'croner';
-
-function handleErrors() {
-    process.on('unhandledRejection', (reason) => {
-        const { client } = container;
-
-        if (!client.webhook) return;
-
-        client.webhook.send({
-            embeds: [
-                new EmbedBuilder()
-                    .setTitle('Unhandled Rejection')
-                    .setColor('Red')
-                    .setDescription(`${codeBlock(reason as string)}`),
-            ],
-            username: client.user?.username ?? 'CRC',
-        });
-    });
-
-    process.on('uncaughtException', (err, origin) => {
-        const { client } = container;
-
-        if (!client.webhook) return;
-
-        client.webhook.send({
-            embeds: [
-                new EmbedBuilder()
-                    .setTitle('Uncaught Exception')
-                    .setColor('Red')
-                    .setDescription(`${origin}: ${codeBlock(err.stack!)}`),
-            ],
-            username: client.user?.username ?? 'CRC',
-        });
-    });
-}
+import { handleWebsocket } from './utils/handle-websocket';
 
 function startHeartbeat() {
-    new Cron('*/30 * * * * *', async () => {
+    new Cron('0 */14 * * * *', async () => {
         try {
             const response = await fetch(
                 'https://crc-bot.onrender.com?from=local',
@@ -63,8 +28,8 @@ async function main(): Promise<void> {
     const client = new BotClient();
 
     try {
-        handleErrors();
         startHeartbeat();
+        handleWebsocket();
 
         await client.login();
     } catch (error) {
@@ -80,5 +45,5 @@ await main().catch(container.logger.error.bind(container.logger));
 
 export default {
     fetch: server.fetch,
-    port: envParseNumber('PORT'),
+    port: process.env.PORT ?? 3000,
 };

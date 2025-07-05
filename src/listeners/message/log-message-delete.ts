@@ -1,5 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
+import { envParseString } from '@skyra/env-utilities';
 import {
     ContainerBuilder,
     FileBuilder,
@@ -18,6 +19,8 @@ import {
 })
 export class BotListener extends Listener {
     public async run(message: Message<true>) {
+        if (envParseString('NODE_ENV') === 'development') return;
+
         let authorId = (
             'authorId' in message ? message.authorId : message.author?.id
         ) as string;
