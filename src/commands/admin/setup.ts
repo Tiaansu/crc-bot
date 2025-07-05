@@ -29,9 +29,21 @@ import postgress from 'postgres';
     subcommands: [
         {
             name: 'roles',
-            chatInputRun: 'chatInputRunRoles',
-            preconditions: ['GuildOnly', 'EphemeralDefer'],
-            requiredUserPermissions: PermissionFlagsBits.Administrator,
+            type: 'group',
+            entries: [
+                {
+                    name: 'create',
+                    chatInputRun: 'chatInputRunRolesCreate',
+                    preconditions: ['GuildOnly', 'EphemeralDefer'],
+                    requiredUserPermissions: PermissionFlagsBits.Administrator,
+                },
+                {
+                    name: 'delete',
+                    chatInputRun: 'chatInputRunRolesDelete',
+                    preconditions: ['GuildOnly', 'EphemeralDefer'],
+                    requiredUserPermissions: PermissionFlagsBits.Administrator,
+                },
+            ],
         },
         {
             name: 'channels',
@@ -61,11 +73,18 @@ export class BotCommand extends Subcommand {
             builder
                 .setName(this.name)
                 .setDescription(this.description)
-                .addSubcommand((command) =>
-                    command
+                .addSubcommandGroup((group) =>
+                    group
                         .setName('roles')
                         .setDescription(
                             'Setup roles for the bot in the server.',
+                        )
+                        .addSubcommand((command) =>
+                            command
+                                .setName('create')
+                                .setDescription(
+                                    'Setup roles for the bot in the server.',
+                                ),
                         ),
                 )
                 .addSubcommand((command) =>
@@ -143,7 +162,7 @@ export class BotCommand extends Subcommand {
         );
     }
 
-    public async chatInputRunRoles(
+    public async chatInputRunRolesCreate(
         interaction: Subcommand.ChatInputCommandInteraction,
     ) {
         await interaction.editReply(
@@ -167,6 +186,10 @@ export class BotCommand extends Subcommand {
             );
         }
 
+        if (rolesToBeCreated.length < 1) {
+            return await interaction.editReply(`No roles to create.`);
+        }
+
         const results = await Promise.all(rolesToBeCreated);
 
         const toDb = [];
@@ -188,14 +211,50 @@ export class BotCommand extends Subcommand {
 
         try {
             await Promise.all(toDb);
+            return await interaction.editReply('Roles created.');
         } catch (error) {
             if (error instanceof postgress.PostgresError) {
                 this.container.logger.error(error.message);
             } else {
                 this.container.logger.error(error);
             }
+            return;
         }
-        return await interaction.editReply('Roles created.');
+    }
+
+    public async chatInputRunRolesDelete(
+        interaction: Subcommand.ChatInputCommandInteraction,
+    ) {
+        await interaction.editReply(
+            'Please wait as the roles are being deleted...',
+        );
+
+        const guildRoles = interaction.guild?.roles.cache.map((r) => r) ?? [];
+
+        const promise = [];
+
+        for (const value of rolesToCreate) {
+            const role = guildRoles.find((role) => role.name === value.name);
+            if (!role) continue;
+
+            promise.push(interaction.guild?.roles.delete(role.id));
+        }
+
+        promise.push(
+            db.delete(roles).where(eq(roles.guildId, interaction.guildId!)),
+        );
+
+        try {
+            await Promise.all(promise);
+            return await interaction.editReply('Roles deleted.');
+        } catch (error) {
+            if (error instanceof postgress.PostgresError) {
+                this.container.logger.error(error.message);
+            } else {
+                this.container.logger.error(error);
+            }
+            return;
+        }
     }
 
     public async chatInputRunChannels(
