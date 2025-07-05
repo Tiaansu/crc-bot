@@ -299,9 +299,15 @@ export class BotCommand extends Subcommand {
             ...gagCategories.map((item) => this.createRolePickerButton(item)),
         );
 
-        await channel.send({
+        const message = await channel.send({
             embeds: [embed],
             components: [row],
+        });
+
+        await db.insert(rolePickers).values({
+            guildId: interaction.guildId!,
+            channelId: channel.id,
+            messageId: message.id,
         });
 
         return await interaction.editReply('Role picker created.');

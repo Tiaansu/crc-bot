@@ -57,6 +57,13 @@
       "when": 1751461008569,
       "tag": "0007_flaky_onslaught",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1751682598775,
+      "tag": "0008_smooth_black_cat",
+      "breakpoints": true
     }
   ]
 }

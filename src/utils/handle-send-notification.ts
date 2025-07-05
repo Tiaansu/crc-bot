@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
 import { channels, roles } from '@/lib/db/schema';
+import { $fetch } from '@/lib/fetch';
 import type {
     notificationSchema,
     stockSchema,
@@ -10,7 +11,6 @@ import { oneLineCommaListsAnd, stripIndents } from 'common-tags';
 import {
     ApplicationEmoji,
     bold,
-    codeBlock,
     Collection,
     ContainerBuilder,
     formatEmoji,
@@ -18,11 +18,14 @@ import {
     HeadingLevel,
     MessageFlags,
     roleMention,
+    SectionBuilder,
     SeparatorBuilder,
     SeparatorSpacingSize,
     TextDisplayBuilder,
+    ThumbnailBuilder,
     time,
     WebhookClient,
+    type APIMessage,
 } from 'discord.js';
 import { and, eq, inArray } from 'drizzle-orm';
 import type { z } from 'zod';
@@ -387,23 +390,71 @@ export async function sendWeatherNotification(
         return;
     }
 
+    const { client } = container;
+    const emojis = await client.application?.emojis.fetch()!;
+
+    const weatherInfos = await $fetch('/growagarden/info?type=weather', {
+        headers: {
+            'Jstudio-key': 'jstudio',
+        },
+    });
+    const activeWeathers = data.filter((item) => item.active);
+
     const channelsConfig = await getChannels('weather');
     channelsConfig.forEach(async (g) => {
         const webhook = new WebhookClient({
             url: g.webhookUrl,
         });
 
-        const { container, separator } = createContainerAndSeparator();
+        const rolesConfig = await db
+            .select()
+            .from(roles)
+            .where(
+                and(eq(roles.guildId, g.guildId), eq(roles.forType, 'weather')),
+            );
 
-        container
-            .addTextDisplayComponents(
-                new TextDisplayBuilder().setContent(
-                    codeBlock('json', JSON.stringify(data, null, 2)),
-                ),
-            )
-            .addSeparatorComponents(separator);
+        const promise: Promise<APIMessage>[] = [];
 
-        sendWebhook(webhook, container);
+        activeWeathers.forEach((weather) => {
+            const weatherInfo = weatherInfos.find(
+                (info) => info.item_id === weather.weather_id,
+            );
+            if (!weatherInfo) return;
+
+            const { container, separator } = createContainerAndSeparator();
+            const emoji = getEmoji(emojis, weather.weather_id);
+
+            const text = new TextDisplayBuilder().setContent(stripIndents`
+                ${heading(`${emoji} ${weatherInfo.display_name}`, HeadingLevel.Two)}
+
+                Starts at ${time(weather.start_duration_unix)} (${time(weather.start_duration_unix, 'R')}) until ${time(weather.end_duration_unix)} (${time(weather.end_duration_unix, 'R')}).
+
+                ${weatherInfo.description}
+            `);
+            const image = new ThumbnailBuilder()
+                .setURL(weatherInfo.icon)
+                .setDescription(weatherInfo.display_name);
+            const section = new SectionBuilder()
+                .addTextDisplayComponents(text)
+                .setThumbnailAccessory(image);
+
+            container
+                .addSectionComponents(section)
+                .addSeparatorComponents(separator);
+
+            const roleConfig = rolesConfig.find(
+                (role) => role.forItem === weather.weather_id,
+            );
+            if (roleConfig) {
+                container.addTextDisplayComponents(
+                    createFooter([roleConfig.roleId]),
+                );
+            }
+
+            promise.push(sendWebhook(webhook, container));
+        });
+
+        await Promise.all(promise);
     });
 }
 

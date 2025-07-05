@@ -10,14 +10,6 @@ export const roles = pgTable('roles', {
 
 export type SelectRoles = typeof roles.$inferSelect;
 
-export const reactionRoles = pgTable('reaction_roles', {
-    id: uuid('id').primaryKey().defaultRandom(),
-    guildId: text('guild_id').notNull(),
-    messageId: text('message_id').notNull(),
-    forType: text('for_type').notNull(),
-    items: text('items').notNull(),
-});
-
 export const rolePickers = pgTable('role_pickers', {
     id: uuid('id').primaryKey().defaultRandom(),
     guildId: text('guild_id').notNull(),

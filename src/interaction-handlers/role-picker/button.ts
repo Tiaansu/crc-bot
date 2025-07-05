@@ -1,3 +1,5 @@
+import { db } from '@/lib/db';
+import { rolePickers } from '@/lib/db/schema';
 import { gagCategories } from '@/utils/constants';
 import { prepareAndReply } from '@/utils/prepare-and-reply-role-picker';
 import { ApplyOptions } from '@sapphire/decorators';
@@ -5,7 +7,8 @@ import {
     InteractionHandler,
     InteractionHandlerTypes,
 } from '@sapphire/framework';
-import { MessageFlags, type ButtonInteraction } from 'discord.js';
+import { inlineCode, MessageFlags, type ButtonInteraction } from 'discord.js';
+import { and, eq } from 'drizzle-orm';
 
 @ApplyOptions<InteractionHandler.Options>({
     interactionHandlerType: InteractionHandlerTypes.Button,
@@ -26,6 +29,24 @@ export class RolePickerHandler extends InteractionHandler {
         await interaction.deferReply({
             flags: MessageFlags.Ephemeral,
         });
+
+        const rolePicker = await db.query.rolePickers.findFirst({
+            where: and(
+                eq(rolePickers.guildId, interaction.guildId!),
+                eq(rolePickers.channelId, interaction.channelId!),
+                eq(rolePickers.messageId, interaction.message.id),
+            ),
+            columns: {
+                id: true,
+            },
+        });
+        if (!rolePicker) {
+            await interaction.editReply(
+                `Role picker is not configured on this server but somehow you were able to use it. Please contact the server admin to run ${inlineCode('/setup role-picker create')}.`,
+            );
+            return;
+        }
+
         await prepareAndReply(interaction, category, 0, interaction.user.id);
     }
 
