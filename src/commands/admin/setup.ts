@@ -85,6 +85,13 @@ export class BotCommand extends Subcommand {
                                 .setDescription(
                                     'Setup roles for the bot in the server.',
                                 ),
+                        )
+                        .addSubcommand((command) =>
+                            command
+                                .setName('delete')
+                                .setDescription(
+                                    'Delete bot roles in the server.',
+                                ),
                         ),
                 )
                 .addSubcommand((command) =>
