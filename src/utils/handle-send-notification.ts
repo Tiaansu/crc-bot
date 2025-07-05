@@ -343,7 +343,7 @@ export async function sendWeatherNotification(
         const startUnix = container.weatherStartUnix.get(item.weather_id);
         const isItemActive = item.active;
 
-        return startUnix !== item.start_duration_unix || isItemActive;
+        return startUnix !== item.start_duration_unix && isItemActive;
     });
 
     activeWeathers.forEach((weather) => {
