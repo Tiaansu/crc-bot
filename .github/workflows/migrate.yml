@@ -1,0 +1,27 @@
+name: Migrate
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - src/lib/db/schema.ts
+      - drizzle
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.17
+
+      - name: Create .env file
+        run: |
+          touch .env
+          echo "${{ secrets.SECRETS }}" >> .env
+
+      - name: Migrate database
+        run: |
+          bun db:push

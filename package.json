@@ -49,7 +49,6 @@
         "start": "cross-env NODE_ENV=production bun src/bot.ts",
         "dev": "cross-env NODE_ENV=development bun --watch src/bot.ts",
         "db:generate": "drizzle-kit generate",
-        "db:push": "cross-env ENV_FILE=.env drizzle-kit push",
-        "db:push:prod": "cross-env ENV_FILE=.env.production.local drizzle-kit push"
+        "db:push": "drizzle-kit push"
     }
 }

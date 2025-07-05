@@ -21,7 +21,7 @@ import {
     PermissionFlagsBits,
 } from 'discord.js';
 import { eq } from 'drizzle-orm';
-import { PostgresError } from 'postgres';
+import postgress from 'postgres';
 
 @ApplyOptions<Subcommand.Options>({
     name: 'setup',
@@ -189,7 +189,7 @@ export class BotCommand extends Subcommand {
         try {
             await Promise.all(toDb);
         } catch (error) {
-            if (error instanceof PostgresError) {
+            if (error instanceof postgress.PostgresError) {
                 this.container.logger.error(error.message);
             } else {
                 this.container.logger.error(error);
