@@ -35,6 +35,14 @@ export async function sendStockNotification(data: {
     gear_stock: z.infer<typeof stockSchema>;
 }) {
     container.logger.info('Sending stock update.');
+    const _data = data.seed_stock ?? data.gear_stock;
+    if (_data === undefined) {
+        container.logger.warn(
+            'Stock data is undefined. Cannot send notification.',
+        );
+        container.logger.info(JSON.stringify(data, null, 4));
+        return;
+    }
 
     const { client } = container;
     const emojis = await client.application?.emojis.fetch()!;
@@ -59,9 +67,6 @@ export async function sendStockNotification(data: {
                     inArray(roles.forItem, itemIdsToFind),
                 ),
             );
-
-        const _data = data.seed_stock ?? data.gear_stock;
-        if (_data === undefined) return; // idk
 
         const start_unix = _data[0].start_date_unix;
         const end_unix = _data[0].end_date_unix;

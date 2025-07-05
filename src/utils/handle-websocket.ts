@@ -60,8 +60,8 @@ export function handleWebsocket() {
         }
 
         sendStockNotification({
-            seed_stock: stockUpdateBuffer.seed_stock ?? [],
-            gear_stock: stockUpdateBuffer.gear_stock ?? [],
+            seed_stock: stockUpdateBuffer.seed_stock!,
+            gear_stock: stockUpdateBuffer.gear_stock!,
         });
         stockUpdateBuffer = { seed_stock: null, gear_stock: null };
         processingTimer = null;
