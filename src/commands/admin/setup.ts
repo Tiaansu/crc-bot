@@ -21,6 +21,7 @@ import {
     PermissionFlagsBits,
 } from 'discord.js';
 import { eq } from 'drizzle-orm';
+import { PostgresError } from 'postgres';
 
 @ApplyOptions<Subcommand.Options>({
     name: 'setup',
@@ -185,7 +186,15 @@ export class BotCommand extends Subcommand {
             );
         }
 
-        await Promise.all(toDb);
+        try {
+            await Promise.all(toDb);
+        } catch (error) {
+            if (error instanceof PostgresError) {
+                this.container.logger.error(error.message);
+            } else {
+                this.container.logger.error(error);
+            }
+        }
         return await interaction.editReply('Roles created.');
     }
 
