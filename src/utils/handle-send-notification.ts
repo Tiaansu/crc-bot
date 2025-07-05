@@ -35,28 +35,35 @@ export async function sendStockNotification(data: {
     gear_stock: z.infer<typeof stockSchema>;
 }) {
     container.logger.info('Sending stock update.');
-    const _data = data.seed_stock ?? data.gear_stock;
-    if (_data === undefined) {
+
+    if (!data.seed_stock.length && !data.gear_stock.length) {
         container.logger.warn(
-            'Stock data is undefined. Cannot send notification.',
+            'No stock data available. Cannot send notification.',
         );
-        container.logger.info(JSON.stringify(data, null, 4));
+        container.logger.info('Data received:', JSON.stringify(data, null, 4));
         return;
     }
 
     const { client } = container;
     const emojis = await client.application?.emojis.fetch()!;
-
     const channelsConfig = await getChannels('stock');
+
+    const referenceData =
+        data.seed_stock?.length > 0 ? data.seed_stock : data.gear_stock;
+    if (!referenceData.length) {
+        container.logger.error('No reference data available for timestamps');
+        return;
+    }
 
     channelsConfig.forEach(async (g) => {
         const webhook = new WebhookClient({
             url: g.webhookUrl,
         });
 
-        const itemIdsToFind = [...data.seed_stock, ...data.gear_stock].map(
-            (item) => item.item_id.replace("'", ''),
-        );
+        const itemIdsToFind = [
+            ...(data.seed_stock || []),
+            ...(data.gear_stock || []),
+        ].map((item) => item.item_id.replace("'", ''));
 
         const rolesConfig = await db
             .select()
@@ -68,8 +75,8 @@ export async function sendStockNotification(data: {
                 ),
             );
 
-        const start_unix = _data[0].start_date_unix;
-        const end_unix = _data[0].end_date_unix;
+        const start_unix = referenceData[0].start_date_unix;
+        const end_unix = referenceData[0].end_date_unix;
         const description = new TextDisplayBuilder().setContent(
             `Here's the stock as of ${time(start_unix)} (${time(start_unix, 'R')}). It will reset at ${time(end_unix)} (${time(end_unix, 'R')}).`,
         );

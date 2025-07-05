@@ -59,10 +59,21 @@ export function handleWebsocket() {
             return;
         }
 
-        sendStockNotification({
-            seed_stock: stockUpdateBuffer.seed_stock!,
-            gear_stock: stockUpdateBuffer.gear_stock!,
-        });
+        const stockPayload = {
+            seed_stock: stockUpdateBuffer.seed_stock || [],
+            gear_stock: stockUpdateBuffer.gear_stock || [],
+        };
+
+        if (
+            stockPayload.seed_stock.length > 0 ||
+            stockPayload.gear_stock.length > 0
+        ) {
+            sendStockNotification(stockPayload);
+        } else {
+            container.logger.warn(
+                'All stock arrays are empty, skipping notification.',
+            );
+        }
         stockUpdateBuffer = { seed_stock: null, gear_stock: null };
         processingTimer = null;
     }
