@@ -43,8 +43,5 @@ declare module '@skyra/env-utilities' {
         DISCORD_WEBHOOK: string;
 
         DATABASE_URL: string;
-
-        PORT: NumberString;
-        HEARTBEAT_URL: string;
     }
 }

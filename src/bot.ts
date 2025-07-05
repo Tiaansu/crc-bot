@@ -1,6 +1,5 @@
 import '@/lib/setup';
 import { container } from '@sapphire/pieces';
-import { envParseNumber } from '@skyra/env-utilities';
 import { Cron } from 'croner';
 import { loadConfig } from './config';
 import { BotClient } from './lib/bot-client';
@@ -8,7 +7,7 @@ import server from './server';
 import { handleWebsocket } from './utils/handle-websocket';
 
 function startHeartbeat() {
-    new Cron('0 */2 * * * *', async () => {
+    new Cron('0 */14 * * * *', async () => {
         try {
             const response = await fetch(
                 'https://crc-bot.onrender.com?from=local',
@@ -46,5 +45,5 @@ await main().catch(container.logger.error.bind(container.logger));
 
 export default {
     fetch: server.fetch,
-    port: envParseNumber('PORT'),
+    port: process.env.PORT ?? 3000,
 };
