@@ -1,3 +1,5 @@
+import { API_URL } from '@/utils/constants';
+import { ping } from '@/utils/ping';
 import { ApplyOptions } from '@sapphire/decorators';
 import {
     ApplicationCommandRegistry,
@@ -5,7 +7,7 @@ import {
     type Awaitable,
 } from '@sapphire/framework';
 import { stripIndents } from 'common-tags';
-import { MessageFlags } from 'discord.js';
+import { EmbedBuilder, MessageFlags } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
     name: 'ping',
@@ -28,13 +30,36 @@ export class BotCommand extends Command {
             flags: MessageFlags.Ephemeral,
         });
 
-        return await interaction.editReply(
-            stripIndents`
-                Pong!
+        const embed = new EmbedBuilder().setTitle('Pong!').addFields([
+            {
+                name: 'Discord',
+                value: stripIndents`
+                        Roundtrip latency: ${message.createdTimestamp - interaction.createdTimestamp}ms
+                        Websocket latency: ${this.container.client.ws.ping}ms
+                    `,
+                inline: true,
+            },
+        ]);
 
-                Roundtrip latency: ${message.createdTimestamp - interaction.createdTimestamp}ms
-                Websocket latency: ${this.container.client.ws.ping}ms
-            `,
+        const { error, downloadTime, totalLatency, ttfb } = await ping(
+            `${API_URL}/growagarden/stock`,
         );
+        if (!error) {
+            embed.addFields([
+                {
+                    name: 'Grow A Garden API',
+                    value: stripIndents`
+                        Time to First Byte (TTFB): ${ttfb!.toFixed(2)} ms
+                        Content Download Time:     ${downloadTime!.toFixed(2)} ms
+
+                        Total Latency:             ${totalLatency!.toFixed(2)} ms
+                    `,
+                },
+            ]);
+        }
+
+        return await interaction.editReply({
+            embeds: [embed],
+        });
     }
 }
