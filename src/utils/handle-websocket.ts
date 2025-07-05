@@ -60,7 +60,7 @@ export function handleWebsocket() {
     };
 
     let processingTimer: NodeJS.Timeout | null = null;
-    const DEBOUNCE_DELAY_MS = 750;
+    const DEBOUNCE_DELAY_MS = 500;
 
     function processAndResetStockBuffer() {
         if (
