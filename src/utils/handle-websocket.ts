@@ -63,6 +63,9 @@ export function handleWebsocket() {
     const DEBOUNCE_DELAY_MS = 500;
 
     function processAndResetStockBuffer() {
+        container.logger.info(
+            `[DEBUG] !pendingStockUpdates.seed_stock ${!pendingStockUpdates.seed_stock} | !pendingStockUpdates.gear_stock ${!pendingStockUpdates.seed_stock} | ${!pendingStockUpdates.seed_stock && !pendingStockUpdates.gear_stock}`,
+        );
         if (
             !pendingStockUpdates.seed_stock &&
             !pendingStockUpdates.gear_stock
@@ -84,6 +87,7 @@ export function handleWebsocket() {
         processingTimer = null;
     }
 
+    let startDiff: number = 0;
     container.socket.addEventListener('message', (event) => {
         const { data: parsedData, success } = generalDataSchema.safeParse(
             JSON.parse(event.data),
@@ -111,6 +115,7 @@ export function handleWebsocket() {
                 const data = parser(parsedData[key], stockSchema);
                 if (!data) return;
 
+                startDiff = performance.now();
                 pendingStockUpdates.seed_stock = data;
                 processingTimer = setTimeout(
                     processAndResetStockBuffer,
@@ -122,6 +127,9 @@ export function handleWebsocket() {
                 const data = parser(parsedData[key], stockSchema);
                 if (!data) return;
 
+                container.logger.info(
+                    `[DEBUG] difference on receiving gear stock after seed stock ${performance.now() - startDiff}`,
+                );
                 pendingStockUpdates.gear_stock = data;
                 processingTimer = setTimeout(
                     processAndResetStockBuffer,
