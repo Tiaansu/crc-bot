@@ -52,7 +52,7 @@ export function handleWebsocket() {
     };
 
     let processingTimer: NodeJS.Timeout | null = null;
-    const DEBOUNCE_DELAY_MS = 50;
+    const DEBOUNCE_DELAY_MS = 250;
 
     function processAndResetStockBuffer() {
         if (!stockUpdateBuffer.seed_stock && !stockUpdateBuffer.gear_stock) {
