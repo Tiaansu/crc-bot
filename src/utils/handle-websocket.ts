@@ -12,6 +12,7 @@ import {
     sendEventStockNotification,
     sendNotification,
     sendStockNotification,
+    sendWeatherNotification,
 } from './handle-send-notification';
 
 const WS_URL = `wss://websocket.joshlei.com/growagarden?user_id=1383283124376572086${process.env.NODE_ENV === 'development' ? '_debug' : ''}`;
@@ -58,7 +59,6 @@ export function handleWebsocket() {
             return;
         }
 
-        container.logger.info('Sending stock update.');
         sendStockNotification({
             seed_stock: stockUpdateBuffer.seed_stock ?? [],
             gear_stock: stockUpdateBuffer.gear_stock ?? [],
@@ -116,7 +116,6 @@ export function handleWebsocket() {
                 const data = parser(parsedData[key], stockSchema);
                 if (!data) return;
 
-                container.logger.info('Sending egg stock update.');
                 sendEggStockNotification(data);
                 break;
             }
@@ -124,7 +123,6 @@ export function handleWebsocket() {
                 const data = parser(parsedData[key], stockSchema);
                 if (!data) return;
 
-                container.logger.info('Sending cosmetic stock update.');
                 sendCosmeticStockNotification(data);
                 break;
             }
@@ -132,7 +130,6 @@ export function handleWebsocket() {
                 const data = parser(parsedData[key], stockSchema);
                 if (!data) return;
 
-                container.logger.info('Sending event shop stock update.');
                 sendEventStockNotification(data);
                 break;
             }
@@ -140,7 +137,6 @@ export function handleWebsocket() {
                 const data = parser(parsedData[key], notificationSchema);
                 if (!data) return;
 
-                container.logger.info('Sending notification.');
                 sendNotification(data);
                 break;
             }
@@ -148,8 +144,7 @@ export function handleWebsocket() {
                 const data = parser(parsedData[key], weatherSchema);
                 if (!data) return;
 
-                container.logger.info('Sending weather update.');
-                // sendWeatherNotification(data);
+                sendWeatherNotification(data);
                 break;
             }
         }

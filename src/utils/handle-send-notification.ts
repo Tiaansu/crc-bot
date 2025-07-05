@@ -31,6 +31,8 @@ export async function sendStockNotification(data: {
     seed_stock: z.infer<typeof stockSchema>;
     gear_stock: z.infer<typeof stockSchema>;
 }) {
+    container.logger.info('Sending stock update.');
+
     const { client } = container;
     const emojis = await client.application?.emojis.fetch()!;
 
@@ -56,6 +58,8 @@ export async function sendStockNotification(data: {
             );
 
         const _data = data.seed_stock ?? data.gear_stock;
+        if (_data === undefined) return; // idk
+
         const start_unix = _data[0].start_date_unix;
         const end_unix = _data[0].end_date_unix;
         const description = new TextDisplayBuilder().setContent(
@@ -93,6 +97,14 @@ export async function sendStockNotification(data: {
 export async function sendEggStockNotification(
     data: z.infer<typeof stockSchema>,
 ) {
+    container.logger.info('Sending egg stock update.');
+    if (data === undefined) {
+        container.logger.warn(
+            'Egg stock data is undefined. Cannot send notification.',
+        );
+        return;
+    }
+
     const { client } = container;
     const emojis = await client.application?.emojis.fetch()!;
 
@@ -145,6 +157,14 @@ export async function sendEggStockNotification(
 export async function sendCosmeticStockNotification(
     data: z.infer<typeof stockSchema>,
 ) {
+    container.logger.info('Sending cosmetic stock update.');
+    if (data === undefined) {
+        container.logger.warn(
+            'Cosmetic stock data is undefined. Cannot send notification.',
+        );
+        return;
+    }
+
     const { client } = container;
     const emojis = await client.application?.emojis.fetch()!;
 
@@ -195,6 +215,14 @@ export async function sendCosmeticStockNotification(
 export async function sendEventStockNotification(
     data: z.infer<typeof stockSchema>,
 ) {
+    container.logger.info('Sending event shop stock update.');
+    if (data === undefined) {
+        container.logger.warn(
+            'Even shop stock data is undefined. Cannot send notification.',
+        );
+        return;
+    }
+
     const { client } = container;
     const emojis = await client.application?.emojis.fetch()!;
 
@@ -242,6 +270,14 @@ export async function sendEventStockNotification(
 export async function sendTravelingMerchantStockNotification(
     data: z.infer<typeof stockSchema>,
 ) {
+    container.logger.info('Sending traveling merchant stock update.');
+    if (data === undefined) {
+        container.logger.warn(
+            'Traveling Merchant stock data is undefined. Cannot send notification.',
+        );
+        return;
+    }
+
     const { client } = container;
     const emojis = await client.application?.emojis.fetch()!;
 
@@ -292,6 +328,14 @@ export async function sendTravelingMerchantStockNotification(
 export async function sendNotification(
     data: z.infer<typeof notificationSchema>,
 ) {
+    container.logger.info('Sending notification.');
+    if (data === undefined) {
+        container.logger.warn(
+            'Notification data is undefined. Cannot send notification.',
+        );
+        return;
+    }
+
     const startTimestamp = data[0].timestamp;
     const endTimestamp = data[0].end_timestamp;
     const description = new TextDisplayBuilder().setContent(
@@ -335,6 +379,14 @@ export async function sendNotification(
 export async function sendWeatherNotification(
     data: z.infer<typeof weatherSchema>,
 ) {
+    container.logger.info('Sending weather update.');
+    if (data === undefined) {
+        container.logger.warn(
+            'Weather data is undefined. Cannot send notification.',
+        );
+        return;
+    }
+
     const channelsConfig = await getChannels('weather');
     channelsConfig.forEach(async (g) => {
         const webhook = new WebhookClient({
