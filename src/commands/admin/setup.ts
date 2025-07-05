@@ -36,12 +36,14 @@ import postgress from 'postgres';
                     chatInputRun: 'chatInputRunRolesCreate',
                     preconditions: ['GuildOnly', 'EphemeralDefer'],
                     requiredUserPermissions: PermissionFlagsBits.Administrator,
+                    requiredClientPermissions: PermissionFlagsBits.ManageRoles,
                 },
                 {
                     name: 'delete',
                     chatInputRun: 'chatInputRunRolesDelete',
                     preconditions: ['GuildOnly', 'EphemeralDefer'],
                     requiredUserPermissions: PermissionFlagsBits.Administrator,
+                    requiredClientPermissions: PermissionFlagsBits.ManageRoles,
                 },
             ],
         },
@@ -50,6 +52,7 @@ import postgress from 'postgres';
             chatInputRun: 'chatInputRunChannels',
             preconditions: ['GuildOnly', 'EphemeralDefer'],
             requiredUserPermissions: PermissionFlagsBits.Administrator,
+            requiredClientPermissions: PermissionFlagsBits.ManageChannels,
         },
         {
             name: 'role-picker',
