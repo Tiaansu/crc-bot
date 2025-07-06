@@ -1,0 +1,1 @@
+ALTER TABLE "roles" ADD COLUMN "for_item_id" text NOT NULL;

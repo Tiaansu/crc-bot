@@ -19,6 +19,16 @@ declare module '@sapphire/pieces' {
         weatherStartUnix: Collection<string, number>;
         lastNotificationHash: string;
         stockDebounceManager: StockDebounceManager;
+        pendingRoleCreation: Collection<
+            string,
+            {
+                itemId: string;
+                itemName: string;
+                itemType: string;
+                itemHexColor: string;
+            }
+        >;
+        currentEditingItemId: Collection<string, string>;
     }
 
     interface StoreRegistryEntries {

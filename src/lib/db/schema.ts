@@ -1,11 +1,18 @@
-import { pgTable, text, uuid } from 'drizzle-orm/pg-core';
+import { integer, pgTable, text, uuid } from 'drizzle-orm/pg-core';
+
+export const rolesConfig = pgTable('roles_config', {
+    itemId: text('item_id').primaryKey(),
+    name: text('name').notNull(),
+    type: text('seed').notNull(),
+    color: integer('color').notNull(),
+});
 
 export const roles = pgTable('roles', {
     id: uuid('id').primaryKey().defaultRandom(),
     guildId: text('guild_id').notNull(),
     roleId: text('role_id').notNull(),
-    forItem: text('for_item').notNull(),
     forType: text('for_type').notNull(),
+    forItem: text('for_item').notNull(),
 });
 
 export type SelectRoles = typeof roles.$inferSelect;

@@ -32,6 +32,8 @@ export class BotClient extends SapphireClient {
 
     private initializeCollections() {
         container.weatherStartUnix = new Collection();
+        container.pendingRoleCreation = new Collection();
+        container.currentEditingItemId = new Collection();
         container.stockDebounceManager = new StockDebounceManager();
     }
 

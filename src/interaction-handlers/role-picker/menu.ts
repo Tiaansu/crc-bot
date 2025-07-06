@@ -22,7 +22,7 @@ import { chunk } from 'lodash';
 export class RolePickerHandler extends InteractionHandler {
     public override parse(interaction: StringSelectMenuInteraction) {
         const [prefix, category] = interaction.customId.split('_');
-        if (prefix !== 'role-picker' && !this.isRolePickerCategory(category)) {
+        if (prefix !== 'role-picker' || !this.isRolePickerCategory(category)) {
             return this.none();
         }
         return this.some(category);

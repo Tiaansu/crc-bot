@@ -1,0 +1,1 @@
+ALTER TABLE "roles" DROP COLUMN "for_item_id";

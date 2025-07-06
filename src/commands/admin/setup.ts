@@ -1,7 +1,7 @@
-import { rolesToCreate } from '@/lib/data/roles';
 import { db } from '@/lib/db';
-import { channels, rolePickers, roles } from '@/lib/db/schema';
+import { channels, rolePickers, roles, rolesConfig } from '@/lib/db/schema';
 import { gagCategories } from '@/utils/constants';
+import { syncRolesForGuild } from '@/utils/sync-roles-for-guild';
 import { ApplyOptions } from '@sapphire/decorators';
 import type {
     ApplicationCommandRegistry,
@@ -179,57 +179,9 @@ export class BotCommand extends Subcommand {
             'Please wait as the roles are being created...',
         );
 
-        const guildRoles = await interaction.guild?.roles.fetch()!;
-        const guildRolesNames = new Set(guildRoles.map((role) => role.name));
+        await syncRolesForGuild(interaction.guild!);
 
-        const rolesToBeCreated = [];
-
-        for (const value of rolesToCreate) {
-            if (guildRolesNames.has(value.name)) continue;
-
-            rolesToBeCreated.push(
-                interaction.guild?.roles.create({
-                    name: value.name,
-                    color: value.color,
-                    reason: 'Bot setup',
-                })!,
-            );
-        }
-
-        if (rolesToBeCreated.length < 1) {
-            return await interaction.editReply(`No roles to create.`);
-        }
-
-        const results = await Promise.all(rolesToBeCreated);
-
-        const toDb = [];
-
-        for (const role of results) {
-            const item = Object.values(rolesToCreate).find(
-                (item) => item.name === role.name,
-            );
-            if (!item) continue;
-            toDb.push(
-                db.insert(roles).values({
-                    guildId: interaction.guildId!,
-                    roleId: role.id,
-                    forItem: item.itemId,
-                    forType: item.type,
-                }),
-            );
-        }
-
-        try {
-            await Promise.all(toDb);
-            return await interaction.editReply('Roles created.');
-        } catch (error) {
-            if (error instanceof postgress.PostgresError) {
-                this.container.logger.error(error.message);
-            } else {
-                this.container.logger.error(error);
-            }
-            return;
-        }
+        return await interaction.editReply('Roles created.');
     }
 
     public async chatInputRunRolesDelete(
@@ -239,11 +191,13 @@ export class BotCommand extends Subcommand {
             'Please wait as the roles are being deleted...',
         );
 
-        const guildRoles = interaction.guild?.roles.cache.map((r) => r) ?? [];
+        const roleConfig = await db.select().from(rolesConfig);
+
+        const guildRoles = await interaction.guild?.roles.fetch()!;
 
         const promise = [];
 
-        for (const value of rolesToCreate) {
+        for (const value of roleConfig) {
             const role = guildRoles.find((role) => role.name === value.name);
             if (!role) continue;
 

@@ -1,14 +1,15 @@
 import { db } from '@/lib/db';
-import { roles } from '@/lib/db/schema';
+import { roles, rolesConfig } from '@/lib/db/schema';
 import { and, eq, inArray } from 'drizzle-orm';
 
+const extraCategoryItems = [
+    'cosmetic',
+    'event',
+    'notification',
+    'travelingmerchant',
+];
+
 export async function getCategoryRoles(guildId: string, category: string) {
-    const extraCategoryItems = [
-        'cosmetic',
-        'event',
-        'notification',
-        'travelingmerchant',
-    ];
     const isExtra = category === 'extra';
 
     return db
@@ -23,5 +24,18 @@ export async function getCategoryRoles(guildId: string, category: string) {
                     ? inArray(roles.forType, extraCategoryItems)
                     : eq(roles.forType, category),
             ),
+        );
+}
+
+export async function getCategoryRolesConfig(category: string) {
+    const isExtra = category === 'extra';
+
+    return db
+        .select()
+        .from(rolesConfig)
+        .where(
+            isExtra
+                ? inArray(rolesConfig.type, extraCategoryItems)
+                : eq(rolesConfig.type, category),
         );
 }
