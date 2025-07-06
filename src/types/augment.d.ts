@@ -17,6 +17,7 @@ declare module '@sapphire/pieces' {
         guild: Guild;
         socket: WebSocket;
         weatherStartUnix: Collection<string, number>;
+        lastNotificationHash: string;
         stockDebounceManager: StockDebounceManager;
     }
 

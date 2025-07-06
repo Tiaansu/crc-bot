@@ -288,8 +288,13 @@ export async function sendNotification(
 
     const now = Math.floor(Date.now() / 1000);
     const filtered = data.filter((item) => {
+        const hash = getNotificationHash(item);
+        const existing = container.lastNotificationHash === hash;
+
         // We're going to ignore notifications that are older than 1 second
-        return now - item.timestamp < 1000;
+        const isOld = now - item.timestamp > 1000;
+
+        return !isOld && !existing;
     });
 
     const channelsConfig = await getChannels('notification');
@@ -319,6 +324,7 @@ export async function sendNotification(
                 ${endTimestamp ? `${time(endTimestamp)} (${time(endTimestamp, 'R')})` : ''}
             `;
 
+            container.lastNotificationHash = getNotificationHash(item);
             const embed = createEmbed(item.message, description);
             promise.push(sendWebhook(webhook, embed, roleIds));
         });
@@ -409,6 +415,10 @@ export async function sendWeatherNotification(
 }
 
 // helpers
+
+function getNotificationHash(data: z.infer<typeof notificationSchema>[0]) {
+    return new Bun.MD5().update(String(data)).digest('hex');
+}
 
 function createEmbed(title: string, description: string) {
     return new EmbedBuilder()
