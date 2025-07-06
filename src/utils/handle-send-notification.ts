@@ -290,6 +290,7 @@ export async function sendNotification(
     const filtered = data.filter((item) => {
         const hash = getNotificationHash(item);
         const existing = container.lastNotificationHash === hash;
+        container.lastNotificationHash = hash;
 
         // We're going to ignore notifications that are older than 1 second
         const isOld = now - item.timestamp > 1000;
