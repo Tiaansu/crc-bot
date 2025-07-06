@@ -2,6 +2,8 @@ import { CLIENT_OPTIONS } from '@/config';
 import { Enumerable } from '@sapphire/decorators';
 import { container, SapphireClient } from '@sapphire/framework';
 import { Collection, WebhookClient } from 'discord.js';
+import { WebSocketMessageStore } from './structures/ws-message-store';
+import { StockDebounceManager } from './structures/stock-debounce-manager';
 
 export class BotClient extends SapphireClient {
     @Enumerable(false)
@@ -13,6 +15,8 @@ export class BotClient extends SapphireClient {
         this.webhook = new WebhookClient(container.config.webhook);
         this.initializeCollections();
         this.registerCogs();
+
+        container.stores.register(new WebSocketMessageStore());
     }
 
     public override async login(token?: string): Promise<string> {
@@ -28,6 +32,7 @@ export class BotClient extends SapphireClient {
 
     private initializeCollections() {
         container.weatherStartUnix = new Collection();
+        container.stockDebounceManager = new StockDebounceManager();
     }
 
     private registerCogs() {}

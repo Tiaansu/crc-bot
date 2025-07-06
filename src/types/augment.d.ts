@@ -2,6 +2,8 @@ import type { ArrayString, NumberString } from '@skyra/env-utilities';
 import type { ClientConfig } from './config';
 import type WebhookErrorBuilder from '@/lib/structures/webhook-error-builder';
 import type { Collection, Guild } from 'discord.js';
+import type { WebSocketMessageStore } from '@/lib/structures/ws-message-store';
+import type { StockDebounceManager } from '@/lib/structures/stock-debounce-manager';
 
 declare module 'discord.js' {
     interface Client {
@@ -15,6 +17,11 @@ declare module '@sapphire/pieces' {
         guild: Guild;
         socket: WebSocket;
         weatherStartUnix: Collection<string, number>;
+        stockDebounceManager: StockDebounceManager;
+    }
+
+    interface StoreRegistryEntries {
+        'ws-messages': WebSocketMessageStore;
     }
 }
 
