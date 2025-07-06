@@ -60,12 +60,12 @@ export function handleWebsocket() {
     };
 
     let processingTimer: NodeJS.Timeout | null = null;
-    const DEBOUNCE_DELAY_MS = 500;
+    const DEBOUNCE_DELAY_MS = {
+        stock: 1_000,
+        gear: 50,
+    };
 
     function processAndResetStockBuffer() {
-        container.logger.info(
-            `[DEBUG] !pendingStockUpdates.seed_stock ${!pendingStockUpdates.seed_stock} | !pendingStockUpdates.gear_stock ${!pendingStockUpdates.gear_stock} | ${!pendingStockUpdates.seed_stock && !pendingStockUpdates.gear_stock}`,
-        );
         if (
             !pendingStockUpdates.seed_stock &&
             !pendingStockUpdates.gear_stock
@@ -87,7 +87,6 @@ export function handleWebsocket() {
         processingTimer = null;
     }
 
-    let startDiff: number = 0;
     container.socket.addEventListener('message', (event) => {
         const { data: parsedData, success } = generalDataSchema.safeParse(
             JSON.parse(event.data),
@@ -106,70 +105,46 @@ export function handleWebsocket() {
         const key: string = keys[0];
         container.logger.info(`Received data for ${key}.`);
 
-        if (processingTimer) {
-            clearTimeout(processingTimer);
-        }
-
         switch (key) {
             case 'seed_stock': {
                 const data = parser(parsedData[key], stockSchema);
                 if (!data) return;
 
-                startDiff = performance.now();
                 pendingStockUpdates.seed_stock = data;
-                processingTimer = setTimeout(
-                    processAndResetStockBuffer,
-                    DEBOUNCE_DELAY_MS,
-                );
+                clearAndStartDebounce(DEBOUNCE_DELAY_MS.stock);
                 break;
             }
             case 'gear_stock': {
                 const data = parser(parsedData[key], stockSchema);
                 if (!data) return;
 
-                container.logger.info(
-                    `[DEBUG] difference on receiving gear stock after seed stock ${performance.now() - startDiff}`,
-                );
                 pendingStockUpdates.gear_stock = data;
-                processingTimer = setTimeout(
-                    processAndResetStockBuffer,
-                    DEBOUNCE_DELAY_MS,
-                );
+                clearAndStartDebounce(DEBOUNCE_DELAY_MS.gear);
                 break;
             }
             case 'egg_stock': {
                 const data = parser(parsedData[key], stockSchema);
-                if (!data) return;
-
-                sendEggStockNotification(data);
+                if (data) sendEggStockNotification(data);
                 break;
             }
             case 'cosmetic_stock': {
                 const data = parser(parsedData[key], stockSchema);
-                if (!data) return;
-
-                sendCosmeticStockNotification(data);
+                if (data) sendCosmeticStockNotification(data);
                 break;
             }
             case 'eventshop_stock': {
                 const data = parser(parsedData[key], stockSchema);
-                if (!data) return;
-
-                sendEventStockNotification(data);
+                if (data) sendEventStockNotification(data);
                 break;
             }
             case 'notification': {
                 const data = parser(parsedData[key], notificationSchema);
-                if (!data) return;
-
-                sendNotification(data);
+                if (data) sendNotification(data);
                 break;
             }
             case 'weather': {
                 const data = parser(parsedData[key], weatherSchema);
-                if (!data) return;
-
-                sendWeatherNotification(data);
+                if (data) sendWeatherNotification(data);
                 break;
             }
         }
@@ -185,5 +160,12 @@ export function handleWebsocket() {
             return null;
         }
         return data as z.infer<T>;
+    }
+
+    function clearAndStartDebounce(delay: number) {
+        if (processingTimer) {
+            clearTimeout(processingTimer);
+        }
+        processingTimer = setTimeout(processAndResetStockBuffer, delay);
     }
 }
