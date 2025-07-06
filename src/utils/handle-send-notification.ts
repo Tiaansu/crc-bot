@@ -92,9 +92,9 @@ export async function sendEggStockNotification(
     data: z.infer<typeof stockSchema>,
 ) {
     container.logger.info('Sending egg stock update.');
-    if (data === undefined) {
+    if (data === undefined || data.length === 0) {
         container.logger.warn(
-            'Egg stock data is undefined. Cannot send notification.',
+            'Egg stock data is undefined or empty. Cannot send notification.',
         );
         return;
     }
@@ -141,9 +141,9 @@ export async function sendCosmeticStockNotification(
     data: z.infer<typeof stockSchema>,
 ) {
     container.logger.info('Sending cosmetic stock update.');
-    if (data === undefined) {
+    if (data === undefined || data.length === 0) {
         container.logger.warn(
-            'Cosmetic stock data is undefined. Cannot send notification.',
+            'Cosmetic stock data is undefined or empty. Cannot send notification.',
         );
         return;
     }
@@ -188,9 +188,9 @@ export async function sendEventStockNotification(
     data: z.infer<typeof stockSchema>,
 ) {
     container.logger.info('Sending event shop stock update.');
-    if (data === undefined) {
+    if (data === undefined || data.length === 0) {
         container.logger.warn(
-            'Even shop stock data is undefined. Cannot send notification.',
+            'Even shop stock data is undefined or empty. Cannot send notification.',
         );
         return;
     }
@@ -232,9 +232,9 @@ export async function sendTravelingMerchantStockNotification(
     data: z.infer<typeof stockSchema>,
 ) {
     container.logger.info('Sending traveling merchant stock update.');
-    if (data === undefined) {
+    if (data === undefined || data.length === 0) {
         container.logger.warn(
-            'Traveling Merchant stock data is undefined. Cannot send notification.',
+            'Traveling merchant stock data is undefined or empty. Cannot send notification.',
         );
         return;
     }
@@ -279,9 +279,9 @@ export async function sendNotification(
     data: z.infer<typeof notificationSchema>,
 ) {
     container.logger.info('Sending notification.');
-    if (data === undefined) {
+    if (data === undefined || data.length === 0) {
         container.logger.warn(
-            'Notification data is undefined. Cannot send notification.',
+            'Notification data is undefined or empty. Cannot send notification.',
         );
         return;
     }
@@ -331,9 +331,9 @@ export async function sendWeatherNotification(
     data: z.infer<typeof weatherSchema>,
 ) {
     container.logger.info('Sending weather update.');
-    if (data === undefined) {
+    if (data === undefined || data.length === 0) {
         container.logger.warn(
-            'Weather data is undefined. Cannot send notification.',
+            'Weather data is undefined or empty. Cannot send notification.',
         );
         return;
     }
