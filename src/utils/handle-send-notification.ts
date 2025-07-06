@@ -412,7 +412,8 @@ function createEmbed(title: string, description: string) {
         .setDescription(description)
         .setFooter({
             text: 'Powered by JStudio | Made with ❤️ by Tiaansu',
-        });
+        })
+        .setColor('Yellow');
 }
 
 function createStockText(
