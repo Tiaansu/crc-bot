@@ -287,18 +287,10 @@ export async function sendNotification(
     }
 
     const now = Math.floor(Date.now() / 1000);
-    const startTimestamp = data[0].timestamp;
-    // ignore 1 minute old notifications
-    if (now - startTimestamp > 60 * 1000) {
-        container.logger.info('Notification is too old. Ignoring.');
-        return;
-    }
-
-    const endTimestamp = data[0].end_timestamp;
-    const description = stripIndents`
-        ${startTimestamp ? `${time(startTimestamp)} (${time(startTimestamp, 'R')})` : ''}
-        ${endTimestamp ? `${time(endTimestamp)} (${time(endTimestamp, 'R')})` : ''}
-    `;
+    const filtered = data.filter((item) => {
+        // We're going to ignore notifications that are older than 1 second
+        return now - item.timestamp < 1000;
+    });
 
     const channelsConfig = await getChannels('notification');
     channelsConfig.forEach(async (g) => {
@@ -316,10 +308,22 @@ export async function sendNotification(
                 ),
             );
 
-        const embed = createEmbed(data[0].message, description);
-
         const roleIds = rolesConfig.map((r) => r.roleId);
-        sendWebhook(webhook, embed, roleIds);
+        const promise: Promise<APIMessage>[] = [];
+
+        filtered.forEach((item) => {
+            const startTimestamp = item.timestamp;
+            const endTimestamp = item.end_timestamp;
+            const description = stripIndents`
+                ${startTimestamp ? `${time(startTimestamp)} (${time(startTimestamp, 'R')})` : ''}
+                ${endTimestamp ? `${time(endTimestamp)} (${time(endTimestamp, 'R')})` : ''}
+            `;
+
+            const embed = createEmbed(item.message, description);
+            promise.push(sendWebhook(webhook, embed, roleIds));
+        });
+
+        await Promise.all(promise);
     });
 }
 
