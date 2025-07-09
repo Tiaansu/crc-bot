@@ -5,13 +5,14 @@ import {
 } from '@/lib/structures/ws-message';
 import { sendCosmeticStockNotification } from '@/utils/handle-send-notification';
 import { ApplyOptions } from '@sapphire/decorators';
+import type { z } from 'zod';
 
 @ApplyOptions<WebSocketMessage.Options>({
     event: WebSocketMessageEvents.CosmeticStock,
+    schema: stockSchema,
 })
 export class Handler extends WebSocketMessage {
-    public run(rawData: unknown) {
-        const data = this.parser(rawData, stockSchema);
-        if (data) sendCosmeticStockNotification(data);
+    public run(data: z.infer<typeof this.schema>) {
+        sendCosmeticStockNotification(data);
     }
 }

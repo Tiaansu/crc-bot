@@ -4,6 +4,7 @@ import { $fetch } from '@/lib/fetch';
 import type {
     notificationSchema,
     stockSchema,
+    travellingMerchantSchema,
     weatherSchema,
 } from '@/lib/schemas/gag-ws';
 import { container } from '@sapphire/pieces';
@@ -228,11 +229,11 @@ export async function sendEventStockNotification(
     });
 }
 
-export async function sendTravelingMerchantStockNotification(
-    data: z.infer<typeof stockSchema>,
+export async function sendTravellingMerchantStockNotification(
+    data: z.infer<typeof travellingMerchantSchema>,
 ) {
     container.logger.info('Sending traveling merchant stock update.');
-    if (data === undefined || data.length === 0) {
+    if (data === undefined) {
         container.logger.warn(
             'Traveling merchant stock data is undefined or empty. Cannot send notification.',
         );
@@ -244,8 +245,8 @@ export async function sendTravelingMerchantStockNotification(
 
     const channelsConfig = await getChannels('travelingmerchant');
 
-    const startUnix = data[0].start_date_unix;
-    const endUnix = data[0].end_date_unix;
+    const startUnix = data.stocks[0].start_date_unix;
+    const endUnix = data.stocks[0].end_date_unix;
     const description = `Here's the traveling merchant stock as of ${time(startUnix)} (${time(startUnix, 'R')}). It will reset at ${time(endUnix)} (${time(endUnix, 'R')}).`;
 
     channelsConfig.forEach(async (g) => {
@@ -263,10 +264,17 @@ export async function sendTravelingMerchantStockNotification(
                 ),
             );
 
-        const embed = createEmbed('Traveling Merchant', description);
+        const embed = createEmbed(
+            `Traveling Merchant - ${data.merchantName}`,
+            description,
+        );
 
-        if (data.length > 0) {
-            const text = createStockText('Traveling Merchant', data, emojis);
+        if (data.stocks.length > 0) {
+            const text = createStockText(
+                data.merchantName,
+                data.stocks,
+                emojis,
+            );
             embed.addFields(text);
         }
 

@@ -1,3 +1,4 @@
+import { Option, type Awaitable } from '@sapphire/framework';
 import { Piece } from '@sapphire/pieces';
 import type { z, ZodTypeAny } from 'zod';
 
@@ -5,6 +6,7 @@ export abstract class WebSocketMessage<
     Options extends WebSocketMessage.Options = WebSocketMessage.Options,
 > extends Piece<Options, 'ws-messages'> {
     public readonly event: WebSocketMessageEvents;
+    public readonly schema: ZodTypeAny;
 
     public constructor(
         context: WebSocketMessage.LoaderContext,
@@ -13,31 +15,50 @@ export abstract class WebSocketMessage<
         super(context, options);
 
         this.event = options.event;
+        this.schema = options.schema;
     }
 
-    public abstract run(data: unknown): unknown;
+    public abstract run(parsedData: z.infer<typeof this.schema>): unknown;
 
-    public parser<T extends ZodTypeAny>(dataToParse: unknown, parser: T) {
-        const { data, success, error } = parser.safeParse(dataToParse);
+    public parse(_rawData: unknown): Awaitable<Option<unknown>> {
+        const { data, success, error } = this.schema.safeParse(_rawData);
 
         if (!success) {
             const errorMessage = Object.entries(error.flatten().fieldErrors)
                 .map(([key, errors]) => `${key}: ${(errors ?? []).join(', ')}`)
                 .join(' | ');
-            this.container.logger.error(errorMessage);
-            return null;
+            this.container.logger.error(
+                `WebSocket message parse error(${this.event}): ${errorMessage}`,
+            );
+            return this.none();
         }
-        return data as z.infer<T>;
+        return this.some(data);
+    }
+
+    public some(): Option.Some<never>;
+    public some<T>(data: T): Option.Some<T>;
+    public some<T>(data?: T): Option.Some<T | undefined> {
+        return Option.some(data);
+    }
+
+    public none(): Option.None {
+        return Option.none;
     }
 }
 
 export interface WebSocketMessageOptions extends Piece.Options {
     readonly event: WebSocketMessageEvents;
+    readonly schema: ZodTypeAny;
 }
+
+export type WebSocketMessageParseResult<Instance extends WebSocketMessage> =
+    Option.UnwrapSome<Awaited<ReturnType<Instance['parse']>>>;
 
 export namespace WebSocketMessage {
     export type LoaderContext = Piece.LoaderContext<'ws-messages'>;
     export type Options = WebSocketMessageOptions;
+    export type ParseResult<Instance extends WebSocketMessage> =
+        WebSocketMessageParseResult<Instance>;
 }
 
 export enum WebSocketMessageEvents {
@@ -46,7 +67,7 @@ export enum WebSocketMessageEvents {
     EggStock = 'egg_stock',
     CosmeticStock = 'cosmetic_stock',
     EventShopStock = 'eventshop_stock',
-    TravelingMerchantStock = 'travelingmerchant_stock',
+    TravellingMerchantStock = 'travelingmerchant_stock',
     Notification = 'notification',
     Weather = 'weather',
 }

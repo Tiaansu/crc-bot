@@ -4,15 +4,14 @@ import {
     WebSocketMessageEvents,
 } from '@/lib/structures/ws-message';
 import { ApplyOptions } from '@sapphire/decorators';
+import type { z } from 'zod';
 
 @ApplyOptions<WebSocketMessage.Options>({
     event: WebSocketMessageEvents.SeedStock,
+    schema: stockSchema,
 })
 export class Handler extends WebSocketMessage {
-    public run(rawData: unknown) {
-        const data = this.parser(rawData, stockSchema);
-        if (!data) return;
-
+    public run(data: z.infer<typeof this.schema>) {
         this.container.stockDebounceManager.add('seed', data);
     }
 }
