@@ -62,7 +62,7 @@ export class BotCommand extends Subcommand {
         const emojis = await client.application?.emojis.fetch()!;
         const emojisList = new Set(emojis.map((emoji) => emoji.name!));
 
-        const types = ['seed', 'gear', 'egg', 'weather', 'cosmetic', 'event'];
+        const types = ['seed', 'gear', 'egg', 'cosmetic', 'event'];
         const infos = await Promise.all(
             types.map((type) =>
                 $fetch(`/growagarden/info?type=${type}`, {
