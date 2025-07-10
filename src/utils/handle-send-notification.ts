@@ -361,15 +361,12 @@ export async function sendWeatherNotification(
     const activeWeathers = data.filter((item) => {
         const startUnix = container.weatherStartUnix.get(item.weather_id);
         const isItemActive = item.active;
+        container.weatherStartUnix.set(
+            item.weather_id,
+            item.start_duration_unix,
+        );
 
         return startUnix !== item.start_duration_unix && isItemActive;
-    });
-
-    activeWeathers.forEach((weather) => {
-        container.weatherStartUnix.set(
-            weather.weather_id,
-            weather.start_duration_unix,
-        );
     });
 
     const channelsConfig = await getChannels('weather');
