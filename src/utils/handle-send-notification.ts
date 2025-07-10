@@ -366,6 +366,7 @@ export async function sendWeatherNotification(
             item.start_duration_unix,
         );
 
+        if (!startUnix) return isItemActive;
         return startUnix !== item.start_duration_unix && isItemActive;
     });
 
