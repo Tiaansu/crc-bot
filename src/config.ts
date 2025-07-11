@@ -37,6 +37,7 @@ export const CLIENT_OPTIONS: ClientOptions = {
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMessageReactions,
+        GatewayIntentBits.GuildModeration,
     ],
     partials: [
         Partials.User,
