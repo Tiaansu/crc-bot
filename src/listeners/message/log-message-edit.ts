@@ -76,6 +76,7 @@ export class BotListener extends Listener {
         await channel.send({
             components: [container],
             flags: MessageFlags.IsComponentsV2,
+            allowedMentions: { parse: [] },
         });
     }
 }
