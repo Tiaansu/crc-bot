@@ -294,17 +294,20 @@ export async function sendNotification(
         return;
     }
 
+    const sanitized = [...new Set(data)];
+
     const now = Math.floor(Date.now() / 1000);
-    const filtered = data.filter((item) => {
+    const filtered = sanitized.filter((item) => {
         const hash = getNotificationHash(item);
         const existing = container.lastNotificationHash === hash;
         container.lastNotificationHash = hash;
 
-        // We're going to ignore notifications that are older than 1 second
-        const isOld = now - item.timestamp > 1000;
+        // We're going to ignore notifications that are older than 5 second
+        const isOld = now - item.timestamp > 5_000;
 
         return !isOld && !existing;
     });
+    container.logger.info(`Sending ${filtered.length} filtered notifications`);
 
     const channelsConfig = await getChannels('notification');
     channelsConfig.forEach(async (g) => {
@@ -312,17 +315,6 @@ export async function sendNotification(
             url: g.webhookUrl,
         });
 
-        const rolesConfig = await db
-            .select()
-            .from(roles)
-            .where(
-                and(
-                    eq(roles.guildId, g.guildId),
-                    eq(roles.forType, 'notification'),
-                ),
-            );
-
-        const roleIds = rolesConfig.map((r) => r.roleId);
         const promise: Promise<APIMessage>[] = [];
 
         filtered.forEach((item) => {
@@ -335,7 +327,7 @@ export async function sendNotification(
 
             container.lastNotificationHash = getNotificationHash(item);
             const embed = createEmbed(item.message, description);
-            promise.push(sendWebhook(webhook, embed, roleIds));
+            promise.push(sendWebhook(webhook, embed, []));
         });
 
         await Promise.all(promise);

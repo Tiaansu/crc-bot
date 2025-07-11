@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const generalDataSchema = z.record(z.string(), z.array(z.any()));
+export const generalDataSchema = z.record(z.string(), z.any());
 
 export const stockSchema = z.array(
     z.object({
