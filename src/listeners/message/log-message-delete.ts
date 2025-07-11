@@ -34,7 +34,7 @@ export class BotListener extends Listener {
 
         if (author && author.user.bot) return;
         const channel = this.container.client.channels.cache.get(
-            this.container.config.deletionChannelId,
+            this.container.config.logsChannelId,
         );
         if (!channel) {
             return;

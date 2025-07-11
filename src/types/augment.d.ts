@@ -56,7 +56,7 @@ declare module '@skyra/env-utilities' {
         SERVER_ADMIN_IDS: ArrayString;
 
         TRADING_CHANNEL_ID: string;
-        DELETION_CHANNEL_ID: string;
+        LOGS_CHANEL_ID: string;
 
         DISCORD_TOKEN: string;
         DISCORD_WEBHOOK: string;
