@@ -245,8 +245,8 @@ export async function sendTravellingMerchantStockNotification(
 
     const channelsConfig = await getChannels('travelingmerchant');
 
-    const startUnix = data.stocks[0].start_date_unix;
-    const endUnix = data.stocks[0].end_date_unix;
+    const startUnix = data.stock[0].start_date_unix;
+    const endUnix = data.stock[0].end_date_unix;
     const description = `Here's the traveling merchant stock as of ${time(startUnix)} (${time(startUnix, 'R')}). It will reset at ${time(endUnix)} (${time(endUnix, 'R')}).`;
 
     channelsConfig.forEach(async (g) => {
@@ -269,12 +269,8 @@ export async function sendTravellingMerchantStockNotification(
             description,
         );
 
-        if (data.stocks.length > 0) {
-            const text = createStockText(
-                data.merchantName,
-                data.stocks,
-                emojis,
-            );
+        if (data.stock.length > 0) {
+            const text = createStockText(data.merchantName, data.stock, emojis);
             embed.addFields(text);
         }
 

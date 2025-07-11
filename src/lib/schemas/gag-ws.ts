@@ -65,7 +65,7 @@ export const weatherSchema = z.array(
 
 export const travellingMerchantSchema = z.object({
     merchantName: z.string(),
-    stocks: stockSchema,
+    stock: stockSchema,
 });
 
 export const notificationSchema = z.array(
