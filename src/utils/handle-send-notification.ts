@@ -358,17 +358,8 @@ export async function sendWeatherNotification(
             'Jstudio-key': 'jstudio',
         },
     });
-    const activeWeathers = data.filter((item) => {
-        const startUnix = container.weatherStartUnix.get(item.weather_id);
-        const isItemActive = item.active;
-        container.weatherStartUnix.set(
-            item.weather_id,
-            item.start_duration_unix,
-        );
 
-        if (!startUnix) return isItemActive;
-        return startUnix !== item.start_duration_unix && isItemActive;
-    });
+    const activeNow = data.filter((item) => item.active);
 
     const channelsConfig = await getChannels('weather');
     channelsConfig.forEach(async (g) => {
@@ -385,16 +376,16 @@ export async function sendWeatherNotification(
 
         const promise: Promise<APIMessage>[] = [];
 
-        activeWeathers.forEach((weather) => {
+        activeNow.forEach((weather) => {
             const weatherInfo = weatherInfos.find(
                 (info) => info.item_id === weather.weather_id,
             );
             if (!weatherInfo) return;
 
             const description = stripIndents`
-                Starts at ${time(weather.start_duration_unix)} (${time(weather.start_duration_unix, 'R')}) until ${time(weather.end_duration_unix)} (${time(weather.end_duration_unix, 'R')}).
-
                 ${weatherInfo.description}
+
+                Starts at ${time(weather.start_duration_unix)} (${time(weather.start_duration_unix, 'R')}) until ${time(weather.end_duration_unix)} (${time(weather.end_duration_unix, 'R')}).
             `;
 
             const embed = createEmbed(
@@ -403,10 +394,8 @@ export async function sendWeatherNotification(
             ).setThumbnail(weatherInfo.icon);
 
             const roleConfig = rolesConfig.find(
-                (role) => role.forItem === weather.weather_id,
+                (role) => role.forItem === weather.weather_id.replace("'", ''),
             );
-            if (roleConfig) {
-            }
 
             promise.push(
                 sendWebhook(

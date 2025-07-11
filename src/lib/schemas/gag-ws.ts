@@ -55,7 +55,11 @@ export const weatherSchema = z.array(
         duration: z.number({
             required_error: 'duration is required',
         }),
-        icon: z.string().optional(),
+        icon: z
+            .string({
+                required_error: 'icon is required',
+            })
+            .url('icon must be a valid URL'),
     }),
 );
 

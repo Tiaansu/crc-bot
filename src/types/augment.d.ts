@@ -16,7 +16,7 @@ declare module '@sapphire/pieces' {
         config: ClientConfig;
         guild: Guild;
         socket: WebSocket;
-        weatherStartUnix: Collection<string, number>;
+        // weatherStartUnix: Collection<string, number>;
         lastNotificationHash: string;
         stockDebounceManager: StockDebounceManager;
         pendingRoleCreation: Collection<
