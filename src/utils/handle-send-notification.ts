@@ -191,7 +191,7 @@ export async function sendEventStockNotification(
     container.logger.info('Sending event shop stock update.');
     if (data === undefined || data.length === 0) {
         container.logger.warn(
-            'Even shop stock data is undefined or empty. Cannot send notification.',
+            'Event shop stock data is undefined or empty. Cannot send notification.',
         );
         return;
     }
@@ -233,7 +233,7 @@ export async function sendTravellingMerchantStockNotification(
     data: z.infer<typeof travellingMerchantSchema>,
 ) {
     container.logger.info('Sending traveling merchant stock update.');
-    if (data === undefined) {
+    if (data === undefined || data.stock.length === 0) {
         container.logger.warn(
             'Traveling merchant stock data is undefined or empty. Cannot send notification.',
         );
