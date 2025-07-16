@@ -62,5 +62,7 @@ declare module '@skyra/env-utilities' {
         DISCORD_WEBHOOK: string;
 
         DATABASE_URL: string;
+
+        RENDER_INSTANCE_ID: string;
     }
 }

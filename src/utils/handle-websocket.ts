@@ -1,10 +1,19 @@
 import { generalDataSchema } from '@/lib/schemas/gag-ws';
 import { container } from '@sapphire/pieces';
+import { envParseString } from '@skyra/env-utilities';
 
-const WS_URL = `wss://websocket.joshlei.com/growagarden?user_id=1383283124376572086${process.env.NODE_ENV === 'development' ? '_debug' : Math.random().toString()}`;
+const WS_URL = `wss://websocket.joshlei.com/growagarden?user_id=1383283124376572086&instance_id=${getRenderInstanceId()}`;
 const HEARTBEAT_CHECK = 5_000;
 
+function getRenderInstanceId() {
+    return (
+        envParseString('RENDER_INSTANCE_ID').split('-').at(-1) ??
+        Math.random().toString()
+    );
+}
+
 export function handleWebsocket() {
+    container.logger.info(`Connecting to WebSocket server... (url: ${WS_URL})`);
     container.socket = new WebSocket(WS_URL);
 
     setInterval(() => {
