@@ -2,7 +2,7 @@ import { generalDataSchema } from '@/lib/schemas/gag-ws';
 import { container } from '@sapphire/pieces';
 import { envParseString } from '@skyra/env-utilities';
 
-const WS_URL = `wss://websocket.joshlei.com/growagarden?user_id=1383283124376572086&instance_id=${getRenderInstanceId()}`;
+const WS_URL = `wss://websocket.joshlei.com/growagarden?user_id=1383283124376572086_instance_id_${getRenderInstanceId()}`;
 const HEARTBEAT_CHECK = 5_000;
 
 function getRenderInstanceId() {
