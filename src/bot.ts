@@ -45,5 +45,6 @@ await main().catch(container.logger.error.bind(container.logger));
 
 export default {
     fetch: server.fetch,
-    port: process.env.PORT ?? 3000,
+    port: process.env.PORT ?? 10000,
+    hostname: "0.0.0.0"
 };
