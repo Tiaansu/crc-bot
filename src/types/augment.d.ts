@@ -63,5 +63,7 @@ declare module '@skyra/env-utilities' {
         DISCORD_WEBHOOK: string;
 
         DATABASE_URL: string;
+
+        JSTUDIO_API_KEY: string;
     }
 }

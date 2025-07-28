@@ -8,6 +8,7 @@ import type {
     weatherSchema,
 } from '@/lib/schemas/gag-ws';
 import { container } from '@sapphire/pieces';
+import { envParseString } from '@skyra/env-utilities';
 import { oneLineCommaListsAnd, stripIndents } from 'common-tags';
 import {
     ApplicationEmoji,
@@ -343,7 +344,7 @@ export async function sendWeatherNotification(
 
     const weatherInfos = await $fetch('/growagarden/info?type=weather', {
         headers: {
-            'Jstudio-key': 'jstudio',
+            'jstudio-key': envParseString('JSTUDIO_API_KEY'),
         },
     });
 
