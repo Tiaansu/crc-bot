@@ -17,10 +17,8 @@ import {
 export class BotListener extends Listener {
     public async run(message: Message<true>) {
         if (envParseString('NODE_ENV') === 'development') return;
-        this.container.logger.info(
-            `[log-message-delete]: message.channel.id(${message.channel.id}) === this.container.config.logsChannelId(${this.container.config.logsChannelId}) = ${message.channel.id === this.container.config.logsChannelId}`,
-        );
-        // if (message.channel.id === this.container.config.logsChannelId) return;
+        if (message.channel.id === this.container.config.tradingChannelId)
+            return;
 
         let authorId = (
             'authorId' in message ? message.authorId : message.author?.id
