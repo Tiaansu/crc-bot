@@ -34,42 +34,48 @@ export class BotListener extends Listener<
         if (!executor || !target) return;
 
         const [, targetDm] = await safeAwait(target.createDM(true));
-        if (!targetDm) return;
+        const [, logChannel] = await safeAwait(
+            guild.channels.fetch(this.container.config.logsChannelId),
+        );
+        if (!targetDm || !logChannel || !logChannel.isSendable()) return;
 
         for (const change of changes) {
             if (change.key !== 'communication_disabled_until') continue;
 
             const { new: newValue, old: oldValue } = change;
 
+            const baseEmbed = new EmbedBuilder()
+                .setAuthor({
+                    iconURL: guild.iconURL() ?? undefined,
+                    name: guild.name,
+                })
+                .setTimestamp();
+
             if (!newValue && oldValue) {
                 // Remove timeout
-                const embed = new EmbedBuilder()
-                    .setAuthor({
-                        iconURL: guild.iconURL() ?? undefined,
-                        name: guild.name,
-                    })
-                    .setTitle('You have been unmuted')
+
+                baseEmbed
                     .setDescription(
                         stripIndents`
                             ${bold('Admin')}: ${executor.displayName}
                         `,
                     )
-                    .setColor('Yellow')
-                    .setTimestamp();
+                    .setColor('Yellow');
 
-                await safeAwait(targetDm.send({ embeds: [embed] }));
+                const embed = baseEmbed.setTitle('You have been unmuted');
+                const logEmbed = baseEmbed.setTitle('Timeout removed');
+
+                await Promise.all([
+                    safeAwait(logChannel.send({ embeds: [logEmbed] })),
+                    safeAwait(targetDm.send({ embeds: [embed] })),
+                ]);
             } else if (!oldValue && newValue) {
                 // Add timeout
                 const timestamp = Math.floor(
                     new Date(newValue).getTime() / 1000,
                 );
 
-                const embed = new EmbedBuilder()
-                    .setAuthor({
-                        iconURL: guild.iconURL() ?? undefined,
-                        name: guild.name,
-                    })
-                    .setTitle('You have been muted')
+                baseEmbed
                     .setDescription(
                         stripIndents`
                             ${bold('Admin')}: ${executor.displayName}
@@ -77,10 +83,15 @@ export class BotListener extends Listener<
                             ${bold('Until')}: ${time(timestamp)} (${time(timestamp, 'R')})
                         `,
                     )
-                    .setColor('Red')
-                    .setTimestamp();
+                    .setColor('Red');
 
-                await safeAwait(targetDm.send({ embeds: [embed] }));
+                const embed = baseEmbed.setTitle('You have been muted');
+                const logEmbed = baseEmbed.setTitle('Timeout added');
+
+                await Promise.all([
+                    safeAwait(logChannel.send({ embeds: [logEmbed] })),
+                    safeAwait(targetDm.send({ embeds: [embed] })),
+                ]);
             }
         }
     }
