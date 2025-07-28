@@ -4,7 +4,7 @@ import { Cron } from 'croner';
 import { loadConfig } from './config';
 import { BotClient } from './lib/bot-client';
 import server from './server';
-import { handleWebsocket } from './utils/handle-websocket';
+import { debugLockFile, handleWebsocket } from './utils/handle-websocket';
 
 function startHeartbeat() {
     new Cron('0 */14 * * * *', async () => {
@@ -28,6 +28,7 @@ async function main(): Promise<void> {
     const client = new BotClient();
 
     try {
+        debugLockFile();
         startHeartbeat();
         handleWebsocket();
 
@@ -46,5 +47,5 @@ await main().catch(container.logger.error.bind(container.logger));
 export default {
     fetch: server.fetch,
     port: process.env.PORT ?? 10000,
-    hostname: "0.0.0.0"
+    hostname: '0.0.0.0',
 };

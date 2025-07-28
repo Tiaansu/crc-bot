@@ -9,37 +9,34 @@ const WS_URL = `wss://websocket.joshlei.com/growagarden?user_id=1383283124376572
 const HEARTBEAT_CHECK = 5_000;
 const LOCK_FILE = path.join(process.cwd(), 'render.lock');
 
-export function handleWebsocket() {
-    // DEBUGGING ONLY
-
-    function debugLockFile() {
-        if (fs.existsSync(LOCK_FILE)) {
-            try {
-                const lockData = JSON.parse(readFileSync(LOCK_FILE, 'utf-8'));
-                container.logger.info(JSON.stringify(lockData, null, 4));
-            } catch (error) {
-                container.logger.error(error);
-            }
+export function debugLockFile() {
+    if (fs.existsSync(LOCK_FILE)) {
+        try {
+            const lockData = JSON.parse(readFileSync(LOCK_FILE, 'utf-8'));
+            container.logger.info(JSON.stringify(lockData, null, 4));
+        } catch (error) {
+            container.logger.error(error);
         }
-
-        fs.writeFileSync(
-            LOCK_FILE,
-            JSON.stringify({
-                pid: process.pid,
-                timestamp: Date.now(),
-            }),
-        );
-
-        process.on('exit', () => {
-            try {
-                fs.unlinkSync(LOCK_FILE);
-            } catch (error) {
-                container.logger.error(error);
-            }
-        });
     }
-    debugLockFile();
 
+    fs.writeFileSync(
+        LOCK_FILE,
+        JSON.stringify({
+            pid: process.pid,
+            timestamp: Date.now(),
+        }),
+    );
+
+    process.on('exit', () => {
+        try {
+            fs.unlinkSync(LOCK_FILE);
+        } catch (error) {
+            container.logger.error(error);
+        }
+    });
+}
+
+export function handleWebsocket() {
     container.logger.info(`Connecting to WebSocket server... (url: ${WS_URL})`);
     const socket = new WebSocket(WS_URL, {
         headers: {
