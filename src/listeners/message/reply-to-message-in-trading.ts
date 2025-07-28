@@ -21,7 +21,10 @@ export class BotListener extends Listener {
         if (!reference) return;
 
         await Promise.all([
-            message.member.timeout(10 * 60 * 10_000), // 10 minutes
+            message.member.timeout(
+                10 * 60 * 1_000,
+                `Replying to a message: ${reference.url}`,
+            ), // 10 minutes
             message.reply({
                 content:
                     'You have been muted for 10 minutes for sending a reply to a message in the trading channel.',
