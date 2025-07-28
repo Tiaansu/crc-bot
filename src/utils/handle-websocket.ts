@@ -1,20 +1,19 @@
 import { generalDataSchema } from '@/lib/schemas/gag-ws';
 import { container } from '@sapphire/pieces';
 import { envParseString } from '@skyra/env-utilities';
+import { WebSocket } from 'ws';
 
-const WS_URL = `wss://websocket.joshlei.com/growagarden?user_id=1383283124376572086_instance_id_${getRenderInstanceId()}`;
+const WS_URL = `wss://websocket.joshlei.com/growagarden?user_id=1383283124376572086${envParseString('NODE_ENV') === 'development' ? '_dev' : ''}`;
 const HEARTBEAT_CHECK = 5_000;
-
-function getRenderInstanceId() {
-    return (
-        envParseString('RENDER_INSTANCE_ID').split('-').at(-1) ??
-        Math.random().toString()
-    );
-}
 
 export function handleWebsocket() {
     container.logger.info(`Connecting to WebSocket server... (url: ${WS_URL})`);
-    container.socket = new WebSocket(WS_URL);
+    const socket = new WebSocket(WS_URL, {
+        headers: {
+            'Jstudio-key': 'jstudio',
+        },
+    });
+    container.socket = socket;
 
     setInterval(() => {
         if (container.socket.readyState === WebSocket.CLOSED) {
@@ -39,7 +38,7 @@ export function handleWebsocket() {
 
     container.socket.addEventListener('message', ({ data }) => {
         const { data: parsedData, success } = generalDataSchema.safeParse(
-            JSON.parse(data),
+            JSON.parse(data.toString()),
         );
 
         if (!success) {

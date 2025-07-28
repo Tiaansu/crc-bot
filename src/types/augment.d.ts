@@ -3,6 +3,7 @@ import type WebhookErrorBuilder from '@/lib/structures/webhook-error-builder';
 import type { WebSocketMessageStore } from '@/lib/structures/ws-message-store';
 import type { ArrayString } from '@skyra/env-utilities';
 import type { Collection, Guild } from 'discord.js';
+import type WebSocket from 'ws';
 import type { ClientConfig } from './config';
 
 declare module 'discord.js' {
@@ -62,7 +63,5 @@ declare module '@skyra/env-utilities' {
         DISCORD_WEBHOOK: string;
 
         DATABASE_URL: string;
-
-        RENDER_INSTANCE_ID: string;
     }
 }
