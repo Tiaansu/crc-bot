@@ -63,7 +63,14 @@ export class BotListener extends Listener<
                     .setColor('Yellow');
 
                 const embed = baseEmbed.setTitle('You have been unmuted');
-                const logEmbed = baseEmbed.setTitle('Timeout removed');
+                const logEmbed = baseEmbed
+                    .setTitle('Timeout removed')
+                    .setDescription(
+                        stripIndents`
+                            ${bold('Admin')}: ${executor.displayName} (${executor.id})
+                            ${bold('User')}: ${target.displayName} (${target.id})
+                        `,
+                    );
 
                 await Promise.all([
                     safeAwait(logChannel.send({ embeds: [logEmbed] })),
@@ -86,7 +93,17 @@ export class BotListener extends Listener<
                     .setColor('Red');
 
                 const embed = baseEmbed.setTitle('You have been muted');
-                const logEmbed = baseEmbed.setTitle('Timeout added');
+                const logEmbed = baseEmbed
+                    .setTitle('Timeout added')
+                    .setDescription(
+                        stripIndents`
+                            ${bold('Admin')}: ${executor.displayName} (${executor.id})
+                            ${bold('User')}: ${target.displayName} (${target.id})
+                            ${bold('Reason')}: ${reason ?? 'No reason provided'}
+                            ${bold('Until')}: ${time(timestamp)} (${time(timestamp, 'R')})
+                        `,
+                    )
+                    .setColor('Red');
 
                 await Promise.all([
                     safeAwait(logChannel.send({ embeds: [logEmbed] })),
