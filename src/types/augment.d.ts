@@ -1,9 +1,9 @@
-import type { ArrayString, NumberString } from '@skyra/env-utilities';
-import type { ClientConfig } from './config';
-import type WebhookErrorBuilder from '@/lib/structures/webhook-error-builder';
-import type { Collection, Guild } from 'discord.js';
-import type { WebSocketMessageStore } from '@/lib/structures/ws-message-store';
 import type { StockDebounceManager } from '@/lib/structures/stock-debounce-manager';
+import type WebhookErrorBuilder from '@/lib/structures/webhook-error-builder';
+import type { WebSocketMessageStore } from '@/lib/structures/ws-message-store';
+import type { ArrayString } from '@skyra/env-utilities';
+import type { Collection, Guild } from 'discord.js';
+import type { ClientConfig } from './config';
 
 declare module 'discord.js' {
     interface Client {
@@ -56,7 +56,7 @@ declare module '@skyra/env-utilities' {
         SERVER_ADMIN_IDS: ArrayString;
 
         TRADING_CHANNEL_ID: string;
-        LOGS_CHANEL_ID: string;
+        LOGS_CHANNEL_ID: string;
 
         DISCORD_TOKEN: string;
         DISCORD_WEBHOOK: string;
