@@ -30,3 +30,9 @@ export const channels = pgTable('channels', {
     webhookUrl: text('webhook_url').notNull(),
     forType: text('for_type').notNull(),
 });
+
+export const offenses = pgTable('offenses', {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: text('user_id').notNull(),
+    currentOffense: integer('current_offense').notNull().default(1),
+});

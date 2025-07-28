@@ -3,10 +3,7 @@ import { Events, Listener } from '@sapphire/framework';
 import { envParseString } from '@skyra/env-utilities';
 import {
     ContainerBuilder,
-    FileBuilder,
     inlineCode,
-    MediaGalleryBuilder,
-    MediaGalleryItemBuilder,
     MessageFlags,
     SeparatorBuilder,
     SeparatorSpacingSize,
@@ -20,6 +17,7 @@ import {
 export class BotListener extends Listener {
     public async run(message: Message<true>) {
         if (envParseString('NODE_ENV') === 'development') return;
+        if (message.channel.id === this.container.config.logsChannelId) return;
 
         let authorId = (
             'authorId' in message ? message.authorId : message.author?.id
@@ -72,7 +70,7 @@ export class BotListener extends Listener {
             .addTextDisplayComponents(channelText)
             .addTextDisplayComponents(contextText);
 
-        if (message.attachments.size > 0) {
+        /*if (message.attachments.size > 0) {
             const label = new TextDisplayBuilder().setContent('Attachments');
             container
                 .addSeparatorComponents(separator)
@@ -107,12 +105,12 @@ export class BotListener extends Listener {
             if (files.length > 0) {
                 container.addFileComponents(...files);
             }
-        }
+        }*/
 
         await channel.send({
             components: [container],
             flags: MessageFlags.IsComponentsV2,
-            files: message.attachments.map((attachment) => attachment.url),
+            // files: message.attachments.map((attachment) => attachment.url),
             allowedMentions: { parse: [] },
         });
     }

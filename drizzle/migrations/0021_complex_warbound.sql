@@ -1,0 +1,1 @@
+ALTER TABLE "offenses" ALTER COLUMN "current_offense" SET DEFAULT 1;
