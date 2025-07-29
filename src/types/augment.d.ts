@@ -3,6 +3,9 @@ import type WebhookErrorBuilder from '@/lib/structures/webhook-error-builder';
 import type { WebSocketMessageStore } from '@/lib/structures/ws-message-store';
 import type { ArrayString } from '@skyra/env-utilities';
 import type { Collection, Guild } from 'discord.js';
+import type PusherServer from 'pusher';
+import type PusherClient from 'pusher-js';
+import type { Channel as PusherClientChannel } from 'pusher-js';
 import type WebSocket from 'ws';
 import type { ClientConfig } from './config';
 
@@ -18,6 +21,11 @@ declare module '@sapphire/pieces' {
         guild: Guild;
         isFlaggedForShutdown: boolean;
         socket: WebSocket;
+        pusher: {
+            server: PusherServer;
+            client: PusherClient;
+            mainChannel?: PusherClientChannel;
+        };
         // weatherStartUnix: Collection<string, number>;
         lastNotificationHash: string;
         stockDebounceManager: StockDebounceManager;
@@ -69,5 +77,10 @@ declare module '@skyra/env-utilities' {
         CRC_BOT_API_KEY: string;
 
         RENDER_INSTANCE_ID: string;
+
+        PUSHER_APP_ID: string;
+        PUSHER_APP_KEY: string;
+        PUSHER_APP_SECRET: string;
+        PUSHER_APP_CLUSTER: string;
     }
 }
