@@ -1,6 +1,7 @@
 import { container } from '@sapphire/pieces';
 import { envParseString } from '@skyra/env-utilities';
 import { Hono } from 'hono';
+import WebSocket from 'ws';
 
 const app = new Hono();
 
@@ -17,15 +18,29 @@ app.get('/', (c) => {
 });
 
 app.post('/shutdown', (c) => {
-    container.logger.info(
-        'Shutting down...' +
-            envParseString('RENDER_INSTANCE_ID').split('-').at(-1),
-    );
-    return c.json({
-        message:
-            'Shutting down...' +
-            envParseString('RENDER_INSTANCE_ID').split('-').at(-1),
-    });
+    const apiKey = c.req.header('crc-bot-api-key');
+    if (!apiKey) {
+        return c.json({ message: 'Unauthorized' }, 401);
+    }
+
+    if (apiKey !== envParseString('CRC_BOT_API_KEY')) {
+        return c.json({ message: 'Unauthorized' }, 401);
+    }
+
+    const from = c.req.query('from');
+
+    if (!from) {
+        return c.json({ message: 'Missing "from" parameter' }, 400);
+    }
+
+    if (container.socket.readyState === WebSocket.OPEN) {
+        container.socket.close();
+    }
+    setTimeout(() => {
+        process.exit(`New instance started. Instance: ${from}`);
+    }, 100);
+
+    return c.body(null, 204);
 });
 
 export default app;
