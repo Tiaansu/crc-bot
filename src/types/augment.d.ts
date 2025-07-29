@@ -65,5 +65,8 @@ declare module '@skyra/env-utilities' {
         DATABASE_URL: string;
 
         JSTUDIO_API_KEY: string;
+        CRC_BOT_API_KEY: string;
+
+        RENDER_INSTANCE_ID: string;
     }
 }
