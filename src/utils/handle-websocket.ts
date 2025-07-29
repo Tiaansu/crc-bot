@@ -6,6 +6,7 @@ import { WebSocket } from 'ws';
 
 const WS_URL = `wss://websocket.joshlei.com/growagarden?user_id=1383283124376572086${envParseString('NODE_ENV') === 'development' ? '_dev' : ''}`;
 const HEARTBEAT_CHECK = 5_000;
+let disconnectedByInstanceId = false;
 
 export async function getInstanceId() {
     try {
@@ -35,6 +36,7 @@ export async function getInstanceId() {
             container.logger.info(`Disconnecting the current websocket...`);
 
             if (container.socket.readyState === WebSocket.OPEN) {
+                disconnectedByInstanceId = true;
                 container.socket.close();
             }
         }
@@ -59,10 +61,17 @@ export function handleWebsocket() {
     });
     container.socket = socket;
 
-    setInterval(() => {
-        if (container.socket.readyState === WebSocket.CLOSED) {
+    const interval = setInterval(() => {
+        if (
+            !disconnectedByInstanceId &&
+            container.socket.readyState === WebSocket.CLOSED
+        ) {
             container.logger.warn('WebSocket is closed. Reconnecting...');
             handleWebsocket();
+        }
+
+        if (disconnectedByInstanceId) {
+            clearInterval(interval);
         }
     }, HEARTBEAT_CHECK);
 
