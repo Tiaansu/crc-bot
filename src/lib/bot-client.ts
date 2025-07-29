@@ -2,8 +2,8 @@ import { CLIENT_OPTIONS } from '@/config';
 import { Enumerable } from '@sapphire/decorators';
 import { container, SapphireClient } from '@sapphire/framework';
 import { Collection, WebhookClient } from 'discord.js';
-import { WebSocketMessageStore } from './structures/ws-message-store';
 import { StockDebounceManager } from './structures/stock-debounce-manager';
+import { WebSocketMessageStore } from './structures/ws-message-store';
 
 export class BotClient extends SapphireClient {
     @Enumerable(false)

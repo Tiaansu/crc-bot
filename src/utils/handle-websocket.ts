@@ -1,4 +1,5 @@
 import { generalDataSchema } from '@/lib/schemas/gag-ws';
+import { betterFetch } from '@better-fetch/fetch';
 import { container } from '@sapphire/pieces';
 import { envParseString } from '@skyra/env-utilities';
 import { WebSocket } from 'ws';
@@ -8,18 +9,19 @@ const HEARTBEAT_CHECK = 5_000;
 
 export async function getInstanceId() {
     try {
-        const response = await fetch('https://crc-bot.onrender.com/id', {
+        const response = await betterFetch<{
+            instanceId: string;
+        }>('https://crc-bot.onrender.com/id', {
             headers: {
                 'CRC-BOT-API-KEY': envParseString('CRC_BOT_API_KEY'),
             },
         });
 
-        if (!response.ok) {
-            throw new Error('Failed to get instance ID');
+        if (response.error) {
+            throw response.error;
         }
 
-        const json = await response.json();
-        const instanceId = json.instanceId;
+        const { instanceId } = response.data;
 
         const currentInstanceId = envParseString('RENDER_INSTANCE_ID')
             .split('-')
@@ -35,8 +37,6 @@ export async function getInstanceId() {
             if (container.socket.readyState === WebSocket.OPEN) {
                 container.socket.close();
             }
-        } else {
-            container.logger.info(`Instance ID: ${instanceId}`);
         }
 
         return true;
@@ -44,6 +44,10 @@ export async function getInstanceId() {
         container.logger.error(error);
         return false;
     }
+}
+
+export function checkWebsocket() {
+    setInterval(getInstanceId, 1000);
 }
 
 export function handleWebsocket() {
