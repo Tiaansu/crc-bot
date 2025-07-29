@@ -32,11 +32,14 @@ export async function initializePusher() {
             if (id === getRenderId()) {
                 container.logger.info('Skipping self.');
             } else {
-                container.logger.info('Shutting down...');
-                if (container.isFlaggedForShutdown) return resolve(2);
+                if (container.isFlaggedForShutdown) {
+                    container.logger.info('Already flagged for shutdown.');
+                    return resolve(2);
+                }
 
                 if (container.socket.readyState === WebSocket.OPEN) {
-                    container.socket.close(7000, 'Shutting down...');
+                    container.logger.info(`Terminating WebSocket...`);
+                    container.socket.terminate();
                 }
                 container.isFlaggedForShutdown = true;
             }
