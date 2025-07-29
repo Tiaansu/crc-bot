@@ -30,12 +30,15 @@ async function shutdownPreviousInstance() {
     try {
         const response = await betterFetch<{
             message: string;
-        }>('https://crc-bot.onrender.com/shutdown', {
-            method: 'POST',
-            headers: {
-                'crc-bot-api-key': envParseString('CRC_BOT_API_KEY'),
+        }>(
+            `https://crc-bot.onrender.com/shutdown?from=${envParseString('RENDER_INSTANCE_ID').split('-').at(-1)}`,
+            {
+                method: 'POST',
+                headers: {
+                    'crc-bot-api-key': envParseString('CRC_BOT_API_KEY'),
+                },
             },
-        });
+        );
 
         if (response.error) {
             throw response.error;
