@@ -33,11 +33,16 @@ app.post('/shutdown', (c) => {
         return c.json({ message: 'Missing "from" parameter' }, 400);
     }
 
+    if (from === envParseString('RENDER_INSTANCE_ID').split('-').at(-1)) {
+        return c.json({ message: 'Cannot shutdown self' }, 400);
+    }
+
     if (container.socket.readyState === WebSocket.OPEN) {
         container.socket.close();
     }
     setTimeout(() => {
-        process.exit(`New instance started. Instance: ${from}`);
+        container.logger.info('New instance started. Instance: ${from}');
+        process.exit(1);
     }, 100);
 
     return c.body(null, 204);
