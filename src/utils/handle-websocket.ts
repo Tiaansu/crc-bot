@@ -1,56 +1,10 @@
 import { generalDataSchema } from '@/lib/schemas/gag-ws';
-import { betterFetch } from '@better-fetch/fetch';
 import { container } from '@sapphire/pieces';
 import { envParseString } from '@skyra/env-utilities';
 import { WebSocket } from 'ws';
 
 const WS_URL = `wss://websocket.joshlei.com/growagarden?user_id=1383283124376572086${envParseString('NODE_ENV') === 'development' ? '_dev' : ''}`;
 const HEARTBEAT_CHECK = 5_000;
-let disconnectedByInstanceId = false;
-
-export async function getInstanceId() {
-    try {
-        const response = await betterFetch<{
-            instanceId: string;
-        }>('https://crc-bot.onrender.com/id', {
-            headers: {
-                'CRC-BOT-API-KEY': envParseString('CRC_BOT_API_KEY'),
-            },
-        });
-
-        if (response.error) {
-            throw response.error;
-        }
-
-        const { instanceId } = response.data;
-
-        const currentInstanceId = envParseString('RENDER_INSTANCE_ID')
-            .split('-')
-            .at(-1);
-
-        if (instanceId !== currentInstanceId) {
-            container.logger.info(
-                `There must be a new instance. Instance ID: ${instanceId}`,
-            );
-            container.logger.info(`Current instance ID: ${currentInstanceId}`);
-            container.logger.info(`Disconnecting the current websocket...`);
-
-            if (container.socket.readyState === WebSocket.OPEN) {
-                disconnectedByInstanceId = true;
-                container.socket.close();
-            }
-        }
-
-        return true;
-    } catch (error) {
-        container.logger.error(error);
-        return false;
-    }
-}
-
-export function checkWebsocket() {
-    setInterval(getInstanceId, 1000);
-}
 
 export function handleWebsocket() {
     container.logger.info(`Connecting to WebSocket server... (url: ${WS_URL})`);
@@ -61,17 +15,10 @@ export function handleWebsocket() {
     });
     container.socket = socket;
 
-    const interval = setInterval(() => {
-        if (
-            !disconnectedByInstanceId &&
-            container.socket.readyState === WebSocket.CLOSED
-        ) {
+    setInterval(() => {
+        if (container.socket.readyState === WebSocket.CLOSED) {
             container.logger.warn('WebSocket is closed. Reconnecting...');
             handleWebsocket();
-        }
-
-        if (disconnectedByInstanceId) {
-            clearInterval(interval);
         }
     }, HEARTBEAT_CHECK);
 

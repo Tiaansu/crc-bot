@@ -1,10 +1,12 @@
 import '@/lib/setup';
+import { betterFetch, BetterFetchError } from '@better-fetch/fetch';
 import { container } from '@sapphire/pieces';
+import { envParseString } from '@skyra/env-utilities';
 import { Cron } from 'croner';
 import { loadConfig } from './config';
 import { BotClient } from './lib/bot-client';
 import server from './server';
-import { checkWebsocket, handleWebsocket } from './utils/handle-websocket';
+import { handleWebsocket } from './utils/handle-websocket';
 
 function startHeartbeat() {
     new Cron('0 */14 * * * *', async () => {
@@ -24,13 +26,36 @@ function startHeartbeat() {
     });
 }
 
+async function shutdownPreviousInstance() {
+    try {
+        const response = await betterFetch<{
+            message: string;
+        }>('https://crc-bot.onrender.com/shutdown', {
+            method: 'POST',
+        });
+
+        if (response.error) {
+            throw response.error;
+        }
+
+        container.logger.info(
+            `[${envParseString('RENDER_INSTANCE_ID').split('-').at(-1)}]: ${response.data['message']}`,
+        );
+    } catch (error) {
+        if (error instanceof BetterFetchError) {
+            return; // ignore
+        }
+        container.logger.error(error);
+    }
+}
+
 async function main(): Promise<void> {
     const client = new BotClient();
 
     try {
         startHeartbeat();
+        shutdownPreviousInstance();
         handleWebsocket();
-        checkWebsocket();
 
         await client.login();
     } catch (error) {
