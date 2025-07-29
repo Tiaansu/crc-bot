@@ -1,4 +1,5 @@
 import { container } from '@sapphire/pieces';
+import { envParseString } from '@skyra/env-utilities';
 import { Hono } from 'hono';
 
 const app = new Hono();
@@ -16,9 +17,14 @@ app.get('/', (c) => {
 });
 
 app.post('/shutdown', (c) => {
-    container.logger.info('Shutting down...');
+    container.logger.info(
+        'Shutting down...' +
+            envParseString('RENDER_INSTANCE_ID').split('-').at(-1),
+    );
     return c.json({
-        message: 'Shutting down...',
+        message:
+            'Shutting down...' +
+            envParseString('RENDER_INSTANCE_ID').split('-').at(-1),
     });
 });
 
