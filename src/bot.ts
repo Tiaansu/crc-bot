@@ -32,6 +32,9 @@ async function shutdownPreviousInstance() {
             message: string;
         }>('https://crc-bot.onrender.com/shutdown', {
             method: 'POST',
+            headers: {
+                'crc-bot-api-key': envParseString('CRC_BOT_API_KEY'),
+            },
         });
 
         if (response.error) {
