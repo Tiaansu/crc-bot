@@ -1,4 +1,5 @@
 import { API_URL } from '@/utils/constants';
+import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { ping } from '@/utils/ping';
 import { ApplyOptions } from '@sapphire/decorators';
 import {
@@ -26,6 +27,8 @@ export class BotCommand extends Command {
     public override async chatInputRun(
         interaction: Command.ChatInputCommandInteraction,
     ) {
+        if (isFlaggedForShutdown()) return;
+
         const message = await interaction.deferReply({
             flags: MessageFlags.Ephemeral,
         });

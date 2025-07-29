@@ -1,5 +1,6 @@
 import { $fetch } from '@/lib/fetch';
 import { infoSchemaArray } from '@/lib/schemas/info';
+import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { processInBatch } from '@/utils/process-in-batch';
 import { ApplyOptions } from '@sapphire/decorators';
 import {
@@ -53,6 +54,8 @@ export class BotCommand extends Subcommand {
     public async chatInputRunEmojiCreate(
         interaction: Subcommand.ChatInputCommandInteraction,
     ) {
+        if (isFlaggedForShutdown()) return;
+
         const { client } = this.container;
 
         await interaction.editReply(
@@ -148,6 +151,8 @@ export class BotCommand extends Subcommand {
     public async chatInputRunEmojiDelete(
         interaction: Subcommand.ChatInputCommandInteraction,
     ) {
+        if (isFlaggedForShutdown()) return;
+
         const { client } = this.container;
 
         await interaction.editReply(

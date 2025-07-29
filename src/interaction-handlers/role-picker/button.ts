@@ -1,6 +1,7 @@
 import { db } from '@/lib/db';
 import { rolePickers } from '@/lib/db/schema';
 import { gagCategories } from '@/utils/constants';
+import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { prepareAndReply } from '@/utils/prepare-and-reply-role-picker';
 import { ApplyOptions } from '@sapphire/decorators';
 import {
@@ -16,6 +17,8 @@ import { and, eq } from 'drizzle-orm';
 })
 export class RolePickerHandler extends InteractionHandler {
     public override parse(interaction: ButtonInteraction) {
+        if (isFlaggedForShutdown()) return this.none();
+
         const [prefix, category] = interaction.customId.split('_');
         if (prefix !== 'role-picker' && !this.isRolePickerCategory(category))
             return this.none();

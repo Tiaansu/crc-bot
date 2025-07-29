@@ -1,3 +1,4 @@
+import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { safeAwait } from '@/utils/safe-await';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
@@ -19,6 +20,8 @@ export class BotListener extends Listener<
     typeof Events.GuildAuditLogEntryCreate
 > {
     public async run(auditLogEntry: GuildAuditLogsEntry, guild: Guild) {
+        if (isFlaggedForShutdown()) return;
+
         const { client } = this.container;
         const { action, executorId, targetId, changes, reason } = auditLogEntry;
 

@@ -2,6 +2,7 @@ import { generalDataSchema } from '@/lib/schemas/gag-ws';
 import { container } from '@sapphire/pieces';
 import { envParseString } from '@skyra/env-utilities';
 import { WebSocket } from 'ws';
+import { isFlaggedForShutdown } from './flag-for-shutdown';
 
 const WS_URL = `wss://websocket.joshlei.com/growagarden?user_id=1383283124376572086${envParseString('NODE_ENV') === 'development' ? '_dev' : ''}`;
 const HEARTBEAT_CHECK = 5_000;
@@ -15,7 +16,15 @@ export function handleWebsocket() {
     });
     container.socket = socket;
 
-    setInterval(() => {
+    const interval = setInterval(() => {
+        if (
+            isFlaggedForShutdown() &&
+            container.socket.readyState === WebSocket.CLOSED
+        ) {
+            clearInterval(interval);
+            return;
+        }
+
         if (container.socket.readyState === WebSocket.CLOSED) {
             container.logger.warn('WebSocket is closed. Reconnecting...');
             handleWebsocket();

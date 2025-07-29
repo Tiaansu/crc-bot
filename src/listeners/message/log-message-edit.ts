@@ -1,3 +1,4 @@
+import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
 import {
@@ -15,6 +16,8 @@ import {
 })
 export class BotListener extends Listener {
     public async run(oldMessage: Message<true>, newMessage: Message<true>) {
+        if (isFlaggedForShutdown()) return;
+
         const { client, config } = this.container;
 
         if (newMessage.author.bot) return;

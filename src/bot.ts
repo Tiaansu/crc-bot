@@ -59,6 +59,7 @@ async function main(): Promise<void> {
     const client = new BotClient();
 
     try {
+        container.isFlaggedForShutdown = false;
         startHeartbeat();
         shutdownPreviousInstance();
         handleWebsocket();

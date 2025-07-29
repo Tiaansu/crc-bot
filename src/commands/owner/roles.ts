@@ -1,3 +1,4 @@
+import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { ApplyOptions } from '@sapphire/decorators';
 import {
     ApplicationCommandRegistry,
@@ -40,6 +41,8 @@ export class BotCommand extends Command {
     public override async chatInputRun(
         interaction: Command.ChatInputCommandInteraction,
     ) {
+        if (isFlaggedForShutdown()) return;
+
         const createBtn = new ButtonBuilder()
             .setCustomId('role-config-create')
             .setLabel('Create')

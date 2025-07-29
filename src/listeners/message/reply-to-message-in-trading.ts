@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
 import { offenses } from '@/lib/db/schema';
+import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { safeAwait } from '@/utils/safe-await';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
@@ -14,6 +15,8 @@ export class BotListener extends Listener {
     #MUTE_MINUTES: number = 10; // default
 
     public async run(message: Message) {
+        if (isFlaggedForShutdown()) return;
+
         if (message.author.bot) return;
         if (message.channel.id !== this.container.config.tradingChannelId)
             return;

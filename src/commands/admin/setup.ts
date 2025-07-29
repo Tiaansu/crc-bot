@@ -1,6 +1,7 @@
 import { db } from '@/lib/db';
 import { channels, rolePickers, roles, rolesConfig } from '@/lib/db/schema';
 import { gagCategories } from '@/utils/constants';
+import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { syncRolesForGuild } from '@/utils/sync-roles-for-guild';
 import { ApplyOptions } from '@sapphire/decorators';
 import type {
@@ -175,6 +176,8 @@ export class BotCommand extends Subcommand {
     public async chatInputRunRolesCreate(
         interaction: Subcommand.ChatInputCommandInteraction,
     ) {
+        if (isFlaggedForShutdown()) return;
+
         await interaction.editReply(
             'Please wait as the roles are being created...',
         );
@@ -187,6 +190,8 @@ export class BotCommand extends Subcommand {
     public async chatInputRunRolesDelete(
         interaction: Subcommand.ChatInputCommandInteraction,
     ) {
+        if (isFlaggedForShutdown()) return;
+
         await interaction.editReply(
             'Please wait as the roles are being deleted...',
         );
@@ -224,6 +229,8 @@ export class BotCommand extends Subcommand {
     public async chatInputRunChannels(
         interaction: Subcommand.ChatInputCommandInteraction,
     ) {
+        if (isFlaggedForShutdown()) return;
+
         await Promise.all([
             this.insertToChannelTable(interaction, 'stock', 'stock'),
             this.insertToChannelTable(interaction, 'egg', 'egg'),
@@ -278,6 +285,8 @@ export class BotCommand extends Subcommand {
     public async chatInputRunRolePickerCreate(
         interaction: Subcommand.ChatInputCommandInteraction,
     ) {
+        if (isFlaggedForShutdown()) return;
+
         const rolePicker = await db.query.rolePickers.findFirst({
             where: eq(rolePickers.guildId, interaction.guildId!),
         });

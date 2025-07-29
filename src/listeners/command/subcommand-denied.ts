@@ -1,3 +1,4 @@
+import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener, UserError } from '@sapphire/framework';
 import {
@@ -17,6 +18,8 @@ export class BotListener extends Listener<
         { message: content }: UserError,
         { interaction }: ChatInputSubcommandDeniedPayload,
     ) {
+        if (isFlaggedForShutdown()) return;
+
         if (interaction.deferred || interaction.replied) {
             return await interaction.editReply({
                 content,

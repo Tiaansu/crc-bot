@@ -2,6 +2,7 @@ import { container } from '@sapphire/pieces';
 import { envParseString } from '@skyra/env-utilities';
 import { Hono } from 'hono';
 import WebSocket from 'ws';
+import { flagForShutdown } from './utils/flag-for-shutdown';
 
 const app = new Hono();
 
@@ -39,12 +40,12 @@ app.post('/shutdown', (c) => {
 
     if (container.socket.readyState === WebSocket.OPEN) {
         container.socket.close();
+        flagForShutdown(true);
     }
-    setTimeout(() => {
-        container.logger.info('New instance started. Instance: ${from}');
-        process.exit(1);
-    }, 100);
 
+    container.logger.info(
+        `[${envParseString('RENDER_INSTANCE_ID').split('-').at(-1)}]: Flagged for shutdown by ${from}`,
+    );
     return c.body(null, 204);
 });
 

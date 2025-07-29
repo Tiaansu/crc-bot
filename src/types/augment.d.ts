@@ -16,6 +16,7 @@ declare module '@sapphire/pieces' {
     interface Container {
         config: ClientConfig;
         guild: Guild;
+        isFlaggedForShutdown: boolean;
         socket: WebSocket;
         // weatherStartUnix: Collection<string, number>;
         lastNotificationHash: string;
