@@ -95,7 +95,9 @@ export class BotCommand extends Command {
                 });
 
                 content.push(`\n> ${dateNow}`);
-                content.push(`> - ${oneLineCommaListsAnd`${mentionSelected}`}`);
+                content.push(
+                    `> - Added ${oneLineCommaListsAnd`${mentionSelected}`}`,
+                );
                 content.push(`\n||@here||`);
 
                 await message.edit({
