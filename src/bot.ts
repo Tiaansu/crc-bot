@@ -1,5 +1,6 @@
 import '@/lib/setup';
 import { container } from '@sapphire/pieces';
+import { envParseString } from '@skyra/env-utilities';
 import { Cron } from 'croner';
 import { loadConfig } from './config';
 import { BotClient } from './lib/bot-client';
@@ -31,9 +32,13 @@ async function main(): Promise<void> {
     try {
         container.isFlaggedForShutdown = false;
         startHeartbeat();
-        await initializePusher();
-        await new Promise((resolve) => setTimeout(resolve, 250));
-        handleWebsocket();
+        if (envParseString('NODE_ENV') !== 'development') {
+            await initializePusher();
+            await new Promise((resolve) => setTimeout(resolve, 250));
+            handleWebsocket();
+        } else {
+            handleWebsocket();
+        }
 
         await client.login();
     } catch (error) {

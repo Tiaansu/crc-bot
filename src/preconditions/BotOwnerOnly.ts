@@ -1,6 +1,9 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Precondition } from '@sapphire/framework';
-import type { CommandInteraction } from 'discord.js';
+import type {
+    CommandInteraction,
+    ContextMenuCommandInteraction,
+} from 'discord.js';
 
 @ApplyOptions<Precondition.Options>({
     name: 'BotOwnerOnly',
@@ -8,6 +11,12 @@ import type { CommandInteraction } from 'discord.js';
 export class BotPrecondition extends Precondition {
     public override chatInputRun(
         interaction: CommandInteraction,
+    ): Precondition.Result {
+        return this.isBotOwner(interaction.user.id);
+    }
+
+    public override contextMenuRun(
+        interaction: ContextMenuCommandInteraction,
     ): Precondition.Result {
         return this.isBotOwner(interaction.user.id);
     }

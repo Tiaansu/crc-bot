@@ -4,7 +4,11 @@ import { envParseString } from '@skyra/env-utilities';
 import { WebSocket } from 'ws';
 import { isFlaggedForShutdown } from './flag-for-shutdown';
 
-const WS_URL = `wss://websocket.joshlei.com/growagarden?user_id=1383283124376572086${envParseString('NODE_ENV') === 'development' ? '_dev' : ''}`;
+const USER_ID =
+    envParseString('NODE_ENV') === 'development'
+        ? '761385038020870205'
+        : '1383283124376572086';
+const WS_URL = `wss://websocket.joshlei.com/growagarden?user_id=${USER_ID}`;
 const HEARTBEAT_CHECK = 5_000;
 
 export function handleWebsocket() {
