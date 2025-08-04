@@ -1,16 +1,8 @@
+import { addFields, truncateEmbed } from '@/utils/embed';
 import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
-import { envParseString } from '@skyra/env-utilities';
-import {
-    ContainerBuilder,
-    inlineCode,
-    MessageFlags,
-    SeparatorBuilder,
-    SeparatorSpacingSize,
-    TextDisplayBuilder,
-    type Message,
-} from 'discord.js';
+import { inlineCode, messageLink, MessageType, type Message } from 'discord.js';
 
 @ApplyOptions<Listener.Options>({
     event: Events.MessageDelete,
@@ -18,103 +10,98 @@ import {
 export class BotListener extends Listener {
     public async run(message: Message<true>) {
         if (isFlaggedForShutdown()) return;
-        if (envParseString('NODE_ENV') === 'development') return;
-        if (message.channel.id === this.container.config.tradingChannelId)
-            return;
-
-        let authorId = (
-            'authorId' in message ? message.authorId : message.author?.id
-        ) as string;
-        if (!authorId) return;
-
-        const { guild } = message;
-        const author = guild.members.cache.get(authorId);
-        if (!author) {
+        if (message.author.bot) {
             return;
         }
 
-        if (author && author.user.bot) return;
+        if (!message.inGuild()) {
+            return;
+        }
+
+        if (
+            !message.content.length &&
+            !message.embeds.length &&
+            !message.attachments.size &&
+            !message.stickers.size
+        ) {
+            return;
+        }
+
+        if (message.channel.id === this.container.config.tradingChannelId) {
+            return;
+        }
+
+        const infoParts = [
+            `• Channel: ${message.channel.toString()} - ${message.channel.name} (${message.channel.id})`,
+        ];
+
+        let embed = addFields({
+            author: {
+                name: `${message.author.displayName} (${message.author.id})`,
+                icon_url: message.author.displayAvatarURL(),
+            },
+            color: 0xb75cff,
+            title: 'Message deleted',
+            description: `${message.content.length ? message.content : '<No message content>'}`,
+            footer: {
+                text: message.id,
+            },
+            timestamp: new Date().toISOString(),
+        });
+
+        if (!message.content && message.embeds.length) {
+            infoParts.push(`• Embeds: ${message.embeds.length}`);
+        }
+
+        if (message.attachments.size) {
+            const attachmentParts = [];
+            let counter = 1;
+
+            for (const attachment of message.attachments.values()) {
+                attachmentParts.push(
+                    `[attachment-${counter}](${attachment.proxyURL})`,
+                );
+                counter++;
+            }
+
+            infoParts.push(`• Attachments: ${attachmentParts.join(' ')}`);
+        }
+
+        if (message.stickers.size) {
+            infoParts.push(
+                `• Stickers: ${message.stickers.map((sticker) => inlineCode(sticker.name)).join(', ')}`,
+            );
+        }
+
+        infoParts.push(`• [Jump to](${message.url})`);
+
+        if (
+            message.type === MessageType.Reply &&
+            message.reference &&
+            message.mentions.repliedUser
+        ) {
+            const { channelId, messageId, guildId } = message.reference;
+            const replyUrl = messageLink(channelId, messageId!, guildId!);
+
+            infoParts.push(
+                message.mentions.users.has(message.mentions.repliedUser.id)
+                    ? `• @Replying to [${messageId}](${replyUrl}) by ${inlineCode(message.mentions.repliedUser.displayName)} (${message.mentions.repliedUser.id})`
+                    : `• Replying to [${messageId}](${replyUrl}) by ${inlineCode(message.mentions.repliedUser.displayName)} (${message.mentions.repliedUser.id})`,
+            );
+        }
+
+        embed = addFields(embed, {
+            name: '\u200B',
+            value: infoParts.join('\n'),
+        });
+
         const channel = this.container.client.channels.cache.get(
             this.container.config.logsChannelId,
         );
-        if (!channel) {
-            return;
-        }
-
-        if (!channel.isSendable()) {
-            return;
-        }
-
-        const container = new ContainerBuilder();
-        const separator = new SeparatorBuilder().setSpacing(
-            SeparatorSpacingSize.Large,
-        );
-
-        const noticeText = new TextDisplayBuilder().setContent(
-            `# A message has been deleted!`,
-        );
-        container
-            .addTextDisplayComponents(noticeText)
-            .addSeparatorComponents(separator);
-
-        const authorText = new TextDisplayBuilder().setContent(
-            `${inlineCode('Author')}: ${message.author ?? 'Unknown'}`,
-        );
-
-        const channelText = new TextDisplayBuilder().setContent(
-            `${inlineCode('Channel')}: ${message.channel ?? 'Unknown'}`,
-        );
-
-        const contextText = new TextDisplayBuilder().setContent(
-            [`${inlineCode('Content')}:`, message.content].join('\n'),
-        );
-        container
-            .addTextDisplayComponents(authorText)
-            .addTextDisplayComponents(channelText)
-            .addTextDisplayComponents(contextText);
-
-        /*if (message.attachments.size > 0) {
-            const label = new TextDisplayBuilder().setContent('Attachments');
-            container
-                .addSeparatorComponents(separator)
-                .addTextDisplayComponents(label);
-
-            const mediaGalleryItems: MediaGalleryItemBuilder[] = [];
-            const files: FileBuilder[] = [];
-            message.attachments.forEach((attachment) => {
-                const isImage = attachment.contentType?.startsWith('image/');
-                if (isImage) {
-                    mediaGalleryItems.push(
-                        new MediaGalleryItemBuilder().setURL(attachment.url),
-                    );
-                    return;
-                }
-
-                files.push(
-                    new FileBuilder({
-                        file: {
-                            url: `attachment://${attachment.name}`,
-                        },
-                    }),
-                );
-            });
-
-            if (mediaGalleryItems.length > 0) {
-                container.addMediaGalleryComponents(
-                    new MediaGalleryBuilder().addItems(...mediaGalleryItems),
-                );
-            }
-
-            if (files.length > 0) {
-                container.addFileComponents(...files);
-            }
-        }*/
+        if (!channel || !channel.isSendable()) return;
 
         await channel.send({
-            components: [container],
-            flags: MessageFlags.IsComponentsV2,
-            // files: message.attachments.map((attachment) => attachment.url),
-            allowedMentions: { parse: [] },
+            embeds: [truncateEmbed(embed)],
         });
     }
 }
