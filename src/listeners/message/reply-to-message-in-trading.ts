@@ -15,6 +15,12 @@ export class BotListener extends Listener {
     #MUTE_MINUTES: number = 10; // default
 
     public async run(message: Message) {
+        if (
+            envParseString('NODE_ENV') !== 'development' &&
+            message.guildId !== this.container.config.guildId
+        )
+            return;
+
         if (isFlaggedForShutdown()) return;
 
         if (message.author.bot) return;

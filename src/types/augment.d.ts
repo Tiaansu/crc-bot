@@ -65,8 +65,10 @@ declare module '@skyra/env-utilities' {
         BOT_OWNER_IDS: ArrayString;
         SERVER_ADMIN_IDS: ArrayString;
 
+        GUILD_ID: string;
         TRADING_CHANNEL_ID: string;
         LOGS_CHANNEL_ID: string;
+        WFL_LOUNGE_CHANNEL_ID: string;
 
         DISCORD_TOKEN: string;
         DISCORD_WEBHOOK: string;

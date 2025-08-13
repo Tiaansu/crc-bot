@@ -19,8 +19,10 @@ export function loadConfig(): void {
         isDev,
         ownerIds: envParseArray('BOT_OWNER_IDS'),
         serverAdminIds: envParseArray('SERVER_ADMIN_IDS'),
+        guildId: envParseString('GUILD_ID'),
         tradingChannelId: envParseString('TRADING_CHANNEL_ID'),
         logsChannelId: envParseString('LOGS_CHANNEL_ID'),
+        wflLoungeChannelId: envParseString('WFL_LOUNGE_CHANNEL_ID'),
         webhook: {
             id: envParseString('DISCORD_WEBHOOK').split('/').at(-2)!,
             token: envParseString('DISCORD_WEBHOOK').split('/').at(-1)!,

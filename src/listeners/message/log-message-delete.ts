@@ -2,6 +2,7 @@ import { addFields, truncateEmbed } from '@/utils/embed';
 import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
+import { envParseString } from '@skyra/env-utilities';
 import { inlineCode, messageLink, MessageType, type Message } from 'discord.js';
 
 @ApplyOptions<Listener.Options>({
@@ -9,6 +10,11 @@ import { inlineCode, messageLink, MessageType, type Message } from 'discord.js';
 })
 export class BotListener extends Listener {
     public async run(message: Message<true>) {
+        if (
+            envParseString('NODE_ENV') !== 'development' &&
+            message.guildId !== this.container.config.guildId
+        )
+            return;
         if (isFlaggedForShutdown()) return;
         if (message.author.bot) {
             return;
