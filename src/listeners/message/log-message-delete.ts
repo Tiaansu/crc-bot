@@ -20,7 +20,7 @@ export class BotListener extends Listener {
             return;
         }
 
-        if (!message.content.length && !message.embeds.length && !message.attachments.size && !message.stickers.size) {
+        if (!message.content?.length && !message.embeds.length && !message.attachments.size && !message.stickers.size) {
             return;
         }
 
