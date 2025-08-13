@@ -12,7 +12,7 @@ import { eq } from 'drizzle-orm';
     event: Events.MessageCreate,
 })
 export class BotListener extends Listener {
-    #MUTE_MINUTES: number = 10; // default
+    #MUTE_MINUTES: number = 30; // default
 
     public async run(message: Message) {
         if (envParseString('NODE_ENV') !== 'development' && message.guildId !== this.container.config.guildId) return;
