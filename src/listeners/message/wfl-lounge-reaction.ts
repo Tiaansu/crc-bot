@@ -19,10 +19,12 @@ export class BotListener extends Listener {
         if (message.author.bot) return;
         if (message.channel.id !== this.container.config.wflLoungeChannelId) return;
 
-        await Promise.all([
-            message.react(this.#EMOJIES.Win),
-            message.react(this.#EMOJIES.Fair),
-            message.react(this.#EMOJIES.Lose),
-        ]);
+        setTimeout(async () => {
+            await Promise.all([
+                message.react(this.#EMOJIES.Win),
+                message.react(this.#EMOJIES.Fair),
+                message.react(this.#EMOJIES.Lose),
+            ]);
+        }, 1000);
     }
 }
