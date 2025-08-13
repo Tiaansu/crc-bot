@@ -12,7 +12,7 @@ export class BotListener extends Listener {
     public async run(message: Message<true>) {
         if (envParseString('NODE_ENV') !== 'development' && message.guildId !== this.container.config.guildId) return;
         if (isFlaggedForShutdown()) return;
-        if (message.author.bot) {
+        if (message.author?.bot) {
             return;
         }
 
