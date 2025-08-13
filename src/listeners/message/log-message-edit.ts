@@ -16,30 +16,20 @@ export class BotListener extends Listener {
         if (newMessage.author.bot) return;
         if (!newMessage.inGuild()) return;
 
-        if (
-            escapeMarkdown(oldMessage.content) ===
-            escapeMarkdown(newMessage.content)
-        ) {
+        if (escapeMarkdown(oldMessage.content) === escapeMarkdown(newMessage.content)) {
             return;
         }
 
         let description: string = '';
 
-        if (
-            /```(.*?)```/s.test(oldMessage.content) &&
-            /```(.*?)```/s.test(newMessage.content)
-        ) {
-            const strippedOldMessage = /```(?:(\S+)\n)?\s*([^]+?)\s*```/.exec(
-                oldMessage.content,
-            );
+        if (/```(.*?)```/s.test(oldMessage.content) && /```(.*?)```/s.test(newMessage.content)) {
+            const strippedOldMessage = /```(?:(\S+)\n)?\s*([^]+?)\s*```/.exec(oldMessage.content);
 
             if (!strippedOldMessage?.[2]) {
                 return;
             }
 
-            const strippedNewMessage = /```(?:(\S+)\n)?\s*([^]+?)\s*```/.exec(
-                newMessage.content,
-            );
+            const strippedNewMessage = /```(?:(\S+)\n)?\s*([^]+?)\s*```/.exec(newMessage.content);
             if (!strippedNewMessage?.[2]) {
                 return;
             }
@@ -48,11 +38,7 @@ export class BotListener extends Listener {
                 return;
             }
 
-            const diffMessage = diffLines(
-                strippedOldMessage[2],
-                strippedNewMessage[2],
-                { newlineIsToken: true },
-            );
+            const diffMessage = diffLines(strippedOldMessage[2], strippedNewMessage[2], { newlineIsToken: true });
 
             for (const part of diffMessage) {
                 if (part.value === '\n') {
@@ -67,10 +53,7 @@ export class BotListener extends Listener {
             const append = '\n```';
             description = `${prepend}${description.slice(0, 3_900)}${append}`;
         } else {
-            const diffMessage = diffWords(
-                escapeMarkdown(oldMessage.content),
-                escapeMarkdown(newMessage.content),
-            );
+            const diffMessage = diffWords(escapeMarkdown(oldMessage.content), escapeMarkdown(newMessage.content));
 
             for (const part of diffMessage) {
                 const markdown = part.added ? '**' : part.removed ? '~~' : '';
@@ -105,9 +88,7 @@ export class BotListener extends Listener {
             },
         );
 
-        const channel = this.container.client.channels.cache.get(
-            this.container.config.logsChannelId,
-        );
+        const channel = this.container.client.channels.cache.get(this.container.config.logsChannelId);
         if (!channel || !channel.isSendable()) {
             return;
         }

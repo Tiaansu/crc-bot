@@ -4,10 +4,7 @@ import { envParseString } from '@skyra/env-utilities';
 import { WebSocket } from 'ws';
 import { isFlaggedForShutdown } from './flag-for-shutdown';
 
-const USER_ID =
-    envParseString('NODE_ENV') === 'development'
-        ? '761385038020870205'
-        : '1383283124376572086';
+const USER_ID = envParseString('NODE_ENV') === 'development' ? '761385038020870205' : '1383283124376572086';
 const WS_URL = `wss://websocket.joshlei.com/growagarden?user_id=${USER_ID}`;
 const HEARTBEAT_CHECK = 5_000;
 
@@ -21,10 +18,7 @@ export function handleWebsocket() {
     container.socket = socket;
 
     const interval = setInterval(() => {
-        if (
-            isFlaggedForShutdown() &&
-            container.socket.readyState === WebSocket.CLOSED
-        ) {
+        if (isFlaggedForShutdown() && container.socket.readyState === WebSocket.CLOSED) {
             clearInterval(interval);
             return;
         }
@@ -40,9 +34,7 @@ export function handleWebsocket() {
     });
 
     container.socket.addEventListener('close', (e) => {
-        container.logger.info(
-            `Disconnected from WebSocket server. Code: ${e.code} Reason: ${e.reason}`,
-        );
+        container.logger.info(`Disconnected from WebSocket server. Code: ${e.code} Reason: ${e.reason}`);
     });
 
     container.socket.addEventListener('error', (error) => {
@@ -50,9 +42,7 @@ export function handleWebsocket() {
     });
 
     container.socket.addEventListener('message', ({ data }) => {
-        const { data: parsedData, success } = generalDataSchema.safeParse(
-            JSON.parse(data.toString()),
-        );
+        const { data: parsedData, success } = generalDataSchema.safeParse(JSON.parse(data.toString()));
 
         if (!success) {
             return;

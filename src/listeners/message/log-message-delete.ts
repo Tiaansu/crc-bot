@@ -10,11 +10,7 @@ import { inlineCode, messageLink, MessageType, type Message } from 'discord.js';
 })
 export class BotListener extends Listener {
     public async run(message: Message<true>) {
-        if (
-            envParseString('NODE_ENV') !== 'development' &&
-            message.guildId !== this.container.config.guildId
-        )
-            return;
+        if (envParseString('NODE_ENV') !== 'development' && message.guildId !== this.container.config.guildId) return;
         if (isFlaggedForShutdown()) return;
         if (message.author.bot) {
             return;
@@ -24,12 +20,7 @@ export class BotListener extends Listener {
             return;
         }
 
-        if (
-            !message.content.length &&
-            !message.embeds.length &&
-            !message.attachments.size &&
-            !message.stickers.size
-        ) {
+        if (!message.content.length && !message.embeds.length && !message.attachments.size && !message.stickers.size) {
             return;
         }
 
@@ -64,9 +55,7 @@ export class BotListener extends Listener {
             let counter = 1;
 
             for (const attachment of message.attachments.values()) {
-                attachmentParts.push(
-                    `[attachment-${counter}](${attachment.proxyURL})`,
-                );
+                attachmentParts.push(`[attachment-${counter}](${attachment.proxyURL})`);
                 counter++;
             }
 
@@ -74,18 +63,12 @@ export class BotListener extends Listener {
         }
 
         if (message.stickers.size) {
-            infoParts.push(
-                `• Stickers: ${message.stickers.map((sticker) => inlineCode(sticker.name)).join(', ')}`,
-            );
+            infoParts.push(`• Stickers: ${message.stickers.map((sticker) => inlineCode(sticker.name)).join(', ')}`);
         }
 
         infoParts.push(`• [Jump to](${message.url})`);
 
-        if (
-            message.type === MessageType.Reply &&
-            message.reference &&
-            message.mentions.repliedUser
-        ) {
+        if (message.type === MessageType.Reply && message.reference && message.mentions.repliedUser) {
             const { channelId, messageId, guildId } = message.reference;
             const replyUrl = messageLink(channelId, messageId!, guildId!);
 
@@ -101,9 +84,7 @@ export class BotListener extends Listener {
             value: infoParts.join('\n'),
         });
 
-        const channel = this.container.client.channels.cache.get(
-            this.container.config.logsChannelId,
-        );
+        const channel = this.container.client.channels.cache.get(this.container.config.logsChannelId);
         if (!channel || !channel.isSendable()) return;
 
         await channel.send({

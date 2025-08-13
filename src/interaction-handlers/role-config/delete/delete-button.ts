@@ -1,9 +1,6 @@
 import { gagCategories } from '@/utils/constants';
 import { ApplyOptions } from '@sapphire/decorators';
-import {
-    InteractionHandler,
-    InteractionHandlerTypes,
-} from '@sapphire/framework';
+import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import {
     ActionRowBuilder,
     StringSelectMenuBuilder,
@@ -30,14 +27,11 @@ export class RoleConfigHandler extends InteractionHandler {
             .setMinValues(1)
             .setOptions(
                 gagCategories.map((item) =>
-                    new StringSelectMenuOptionBuilder()
-                        .setLabel(item)
-                        .setValue(item.toLowerCase()),
+                    new StringSelectMenuOptionBuilder().setLabel(item).setValue(item.toLowerCase()),
                 ),
             );
 
-        const row =
-            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(menu);
+        const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(menu);
 
         return await interaction.editReply({
             content: `Select category...`,

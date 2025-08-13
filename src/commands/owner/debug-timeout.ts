@@ -1,9 +1,5 @@
 import { ApplyOptions } from '@sapphire/decorators';
-import {
-    Command,
-    type ApplicationCommandRegistry,
-    type Awaitable,
-} from '@sapphire/framework';
+import { Command, type ApplicationCommandRegistry, type Awaitable } from '@sapphire/framework';
 import { GuildMember, MessageFlags, PermissionFlagsBits } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
@@ -14,29 +10,20 @@ import { GuildMember, MessageFlags, PermissionFlagsBits } from 'discord.js';
     requiredUserPermissions: [PermissionFlagsBits.ModerateMembers],
 })
 export class BotCommand extends Command {
-    public override registerApplicationCommands(
-        registry: ApplicationCommandRegistry,
-    ): Awaitable<void> {
+    public override registerApplicationCommands(registry: ApplicationCommandRegistry): Awaitable<void> {
         registry.registerChatInputCommand(
             (builder) =>
                 builder
                     .setName(this.name)
                     .setDescription(this.description)
-                    .setDefaultMemberPermissions(
-                        PermissionFlagsBits.ModerateMembers,
-                    )
+                    .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
                     .addUserOption((option) =>
-                        option
-                            .setName('member')
-                            .setDescription('The member to timeout')
-                            .setRequired(true),
+                        option.setName('member').setDescription('The member to timeout').setRequired(true),
                     )
                     .addNumberOption((option) =>
                         option
                             .setName('time')
-                            .setDescription(
-                                'The time to timeout the user (seconds)',
-                            )
+                            .setDescription('The time to timeout the user (seconds)')
                             .setRequired(true),
                     ),
             {
@@ -45,9 +32,7 @@ export class BotCommand extends Command {
         );
     }
 
-    public override async chatInputRun(
-        interaction: Command.ChatInputCommandInteraction,
-    ) {
+    public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
         const member = interaction.options.getMember('member');
         const time = interaction.options.getNumber('time', true);
 
@@ -55,10 +40,7 @@ export class BotCommand extends Command {
             return;
         }
 
-        await (member as GuildMember).timeout(
-            time * 1_000,
-            `Debug timeout by ${interaction.user.tag}`,
-        );
+        await (member as GuildMember).timeout(time * 1_000, `Debug timeout by ${interaction.user.tag}`);
         return await interaction.reply({
             content: 'Timeout successful',
             flags: MessageFlags.Ephemeral,

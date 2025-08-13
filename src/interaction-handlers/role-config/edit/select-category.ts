@@ -1,9 +1,6 @@
 import { prepareAndReplyRoleConfig } from '@/utils/role-config-utils';
 import { ApplyOptions } from '@sapphire/decorators';
-import {
-    InteractionHandler,
-    InteractionHandlerTypes,
-} from '@sapphire/framework';
+import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import type { StringSelectMenuInteraction } from 'discord.js';
 
 @ApplyOptions<InteractionHandler.Options>({
@@ -12,8 +9,7 @@ import type { StringSelectMenuInteraction } from 'discord.js';
 })
 export class RoleConfigHandler extends InteractionHandler {
     public override parse(interaction: StringSelectMenuInteraction) {
-        if (interaction.customId !== 'role-config-edit-select-category')
-            return this.none();
+        if (interaction.customId !== 'role-config-edit-select-category') return this.none();
         return this.some();
     }
 
@@ -21,12 +17,6 @@ export class RoleConfigHandler extends InteractionHandler {
         await interaction.deferUpdate();
 
         const category = interaction.values[0];
-        return await prepareAndReplyRoleConfig(
-            interaction,
-            category,
-            0,
-            interaction.user.id,
-            'edit',
-        );
+        return await prepareAndReplyRoleConfig(interaction, category, 0, interaction.user.id, 'edit');
     }
 }

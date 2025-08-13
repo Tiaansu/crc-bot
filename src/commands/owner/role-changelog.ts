@@ -1,10 +1,6 @@
 import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { ApplyOptions } from '@sapphire/decorators';
-import {
-    ApplicationCommandRegistry,
-    Command,
-    type Awaitable,
-} from '@sapphire/framework';
+import { ApplicationCommandRegistry, Command, type Awaitable } from '@sapphire/framework';
 import { oneLineCommaListsAnd } from 'common-tags';
 import {
     ActionRowBuilder,
@@ -21,24 +17,14 @@ import {
     requiredUserPermissions: [PermissionFlagsBits.Administrator],
 })
 export class BotCommand extends Command {
-    public override registerApplicationCommands(
-        registry: ApplicationCommandRegistry,
-    ): Awaitable<void> {
+    public override registerApplicationCommands(registry: ApplicationCommandRegistry): Awaitable<void> {
         registry.registerContextMenuCommand((builder) =>
-            builder
-                .setName('Roles Changelog')
-                .setType(ApplicationCommandType.Message),
+            builder.setName('Roles Changelog').setType(ApplicationCommandType.Message),
         );
     }
 
-    public override async contextMenuRun(
-        interaction: Command.ContextMenuCommandInteraction,
-    ) {
-        if (
-            !interaction.isMessageContextMenuCommand() ||
-            isFlaggedForShutdown()
-        )
-            return;
+    public override async contextMenuRun(interaction: Command.ContextMenuCommandInteraction) {
+        if (!interaction.isMessageContextMenuCommand() || isFlaggedForShutdown()) return;
 
         const message = interaction.targetMessage;
         if (message.author.id !== this.container.client.user?.id) {
@@ -51,22 +37,14 @@ export class BotCommand extends Command {
         const content = message.content
             .split('\n')
             .filter((item) => item.length > 0 && item !== '||@here||')
-            .map(
-                (item) =>
-                    (item.startsWith('>') &&
-                        !item.startsWith('> -') &&
-                        `\n${item}`) ||
-                    item,
-            );
+            .map((item) => (item.startsWith('>') && !item.startsWith('> -') && `\n${item}`) || item);
 
         const selectMenu = new RoleSelectMenuBuilder()
             .setMinValues(0)
             .setMaxValues(24)
             .setCustomId('changelog-roles-select-menu')
             .setPlaceholder('Select roles...');
-        const row = new ActionRowBuilder<RoleSelectMenuBuilder>().addComponents(
-            selectMenu,
-        );
+        const row = new ActionRowBuilder<RoleSelectMenuBuilder>().addComponents(selectMenu);
 
         const reply = await interaction.reply({
             content: 'Please select roles that have been added',
@@ -76,28 +54,20 @@ export class BotCommand extends Command {
         });
 
         try {
-            const collected =
-                await reply.resource?.message?.awaitMessageComponent({
-                    filter: (i) => i.user.id === interaction.user.id,
-                    time: 60_000,
-                });
+            const collected = await reply.resource?.message?.awaitMessageComponent({
+                filter: (i) => i.user.id === interaction.user.id,
+                time: 60_000,
+            });
 
-            if (
-                collected?.customId === 'changelog-roles-select-menu' &&
-                collected.isRoleSelectMenu()
-            ) {
-                const mentionSelected = collected.values.map((id) =>
-                    roleMention(id),
-                );
+            if (collected?.customId === 'changelog-roles-select-menu' && collected.isRoleSelectMenu()) {
+                const mentionSelected = collected.values.map((id) => roleMention(id));
 
                 const dateNow = new Date().toLocaleDateString('en-PH', {
                     timeZone: 'Asia/Manila',
                 });
 
                 content.push(`\n> ${dateNow}`);
-                content.push(
-                    `> - Added ${oneLineCommaListsAnd`${mentionSelected}`}`,
-                );
+                content.push(`> - Added ${oneLineCommaListsAnd`${mentionSelected}`}`);
                 content.push(`\n||@here||`);
 
                 await message.edit({

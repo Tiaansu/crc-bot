@@ -17,9 +17,7 @@ interface PagedRolePickerOptions {
     userId: string;
 }
 
-export function createPagedRolePickerReply(
-    options: PagedRolePickerOptions,
-): MessageEditOptions {
+export function createPagedRolePickerReply(options: PagedRolePickerOptions): MessageEditOptions {
     const { category, allRoles, memberRoleIds, page, userId } = options;
 
     const rolesChunks = chunk(allRoles, 25);
@@ -39,9 +37,7 @@ export function createPagedRolePickerReply(
             ),
         );
 
-    const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-        menu,
-    );
+    const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(menu);
 
     const prevButton = new ButtonBuilder()
         .setCustomId(`role-page_prev_${category}_${page - 1}_${userId}`)
@@ -55,10 +51,7 @@ export function createPagedRolePickerReply(
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(page >= rolesChunks.length - 1);
 
-    const buttonRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        prevButton,
-        nextButton,
-    );
+    const buttonRow = new ActionRowBuilder<ButtonBuilder>().addComponents(prevButton, nextButton);
 
     return {
         content: `Select or unselect roles from the ${bold(capitalize(category))} category (Page ${page + 1} of ${rolesChunks.length}).`,

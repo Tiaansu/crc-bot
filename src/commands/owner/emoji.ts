@@ -3,10 +3,7 @@ import { infoSchemaArray } from '@/lib/schemas/info';
 import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { processInBatch } from '@/utils/process-in-batch';
 import { ApplyOptions } from '@sapphire/decorators';
-import {
-    ApplicationCommandRegistry,
-    type Awaitable,
-} from '@sapphire/framework';
+import { ApplicationCommandRegistry, type Awaitable } from '@sapphire/framework';
 import { Subcommand } from '@sapphire/plugin-subcommands';
 import type { z } from 'zod';
 
@@ -27,40 +24,26 @@ import type { z } from 'zod';
     ],
 })
 export class BotCommand extends Subcommand {
-    public override registerApplicationCommands(
-        registry: ApplicationCommandRegistry,
-    ): Awaitable<void> {
+    public override registerApplicationCommands(registry: ApplicationCommandRegistry): Awaitable<void> {
         registry.registerChatInputCommand(
             (builder) =>
                 builder
                     .setName(this.name)
                     .setDescription(this.description)
-                    .addSubcommand((command) =>
-                        command
-                            .setName('create')
-                            .setDescription('Create potential new emojis'),
-                    )
-                    .addSubcommand((command) =>
-                        command
-                            .setName('delete')
-                            .setDescription('Completely remove emojis'),
-                    ),
+                    .addSubcommand((command) => command.setName('create').setDescription('Create potential new emojis'))
+                    .addSubcommand((command) => command.setName('delete').setDescription('Completely remove emojis')),
             {
                 guildIds: ['1025336952381263882'],
             },
         );
     }
 
-    public async chatInputRunEmojiCreate(
-        interaction: Subcommand.ChatInputCommandInteraction,
-    ) {
+    public async chatInputRunEmojiCreate(interaction: Subcommand.ChatInputCommandInteraction) {
         if (isFlaggedForShutdown()) return;
 
         const { client } = this.container;
 
-        await interaction.editReply(
-            'Please wait as the emojis are being checked...',
-        );
+        await interaction.editReply('Please wait as the emojis are being checked...');
 
         const emojis = await client.application?.emojis.fetch()!;
         const emojisList = new Set(emojis.map((emoji) => emoji.name!));
@@ -90,15 +73,13 @@ export class BotCommand extends Subcommand {
             `Found ${potentialNewItems.length} potential new emojis. Checking image validity... (0 / ${potentialNewItems.length})`,
         );
 
-        const checkValidity = async (
-            item: z.infer<typeof infoSchemaArray>[0],
-        ) => {
+        const checkValidity = async (item: z.infer<typeof infoSchemaArray>[0]) => {
             try {
                 const response = await fetch(item.icon, {
                     method: 'HEAD',
                 });
                 return response.ok ? item : null;
-            } catch (error) {
+            } catch {
                 return null;
             }
         };
@@ -109,16 +90,9 @@ export class BotCommand extends Subcommand {
             );
 
         const BATCH_SIZE = 25;
-        const checkedItems = await processInBatch(
-            potentialNewItems,
-            BATCH_SIZE,
-            checkValidity,
-            progressCallback,
-        );
+        const checkedItems = await processInBatch(potentialNewItems, BATCH_SIZE, checkValidity, progressCallback);
 
-        const validItemsToAdd = checkedItems.filter(
-            (item): item is NonNullable<typeof item> => item !== null,
-        );
+        const validItemsToAdd = checkedItems.filter((item): item is NonNullable<typeof item> => item !== null);
 
         if (validItemsToAdd.length < 1) {
             return await interaction.editReply('No valid new emojis found.');
@@ -148,47 +122,32 @@ export class BotCommand extends Subcommand {
         );
     }
 
-    public async chatInputRunEmojiDelete(
-        interaction: Subcommand.ChatInputCommandInteraction,
-    ) {
+    public async chatInputRunEmojiDelete(interaction: Subcommand.ChatInputCommandInteraction) {
         if (isFlaggedForShutdown()) return;
 
         const { client } = this.container;
 
-        await interaction.editReply(
-            'Please wait as the emojis are being fetched...',
-        );
+        await interaction.editReply('Please wait as the emojis are being fetched...');
 
         const emojis = await client.application?.emojis.fetch()!;
-        const emojiIds = emojis
-            .filter((emoji) => emoji.name !== 'fallback')
-            .map((emoji) => emoji.id!);
+        const emojiIds = emojis.filter((emoji) => emoji.name !== 'fallback').map((emoji) => emoji.id!);
 
-        await interaction.editReply(
-            `Deleting ${emojiIds.length} emojis... (0 / ${emojiIds.length})`,
-        );
+        await interaction.editReply(`Deleting ${emojiIds.length} emojis... (0 / ${emojiIds.length})`);
 
         const deleteFn = async (emojiId: string) => {
             try {
                 await client.application?.emojis.delete(emojiId);
                 return true;
-            } catch (error) {
+            } catch {
                 return false;
             }
         };
 
         const progress = (processed: number, total: number) =>
-            interaction.editReply(
-                `Deleting ${emojiIds.length} emojis... (${processed} / ${total})`,
-            );
+            interaction.editReply(`Deleting ${emojiIds.length} emojis... (${processed} / ${total})`);
 
         const BATCH_SIZE = 25;
-        const checkedItems = await processInBatch(
-            emojiIds,
-            BATCH_SIZE,
-            deleteFn,
-            progress,
-        );
+        const checkedItems = await processInBatch(emojiIds, BATCH_SIZE, deleteFn, progress);
 
         const success = checkedItems.filter((item) => item).length;
         const failed = emojiIds.length - success;

@@ -2,10 +2,7 @@ import { db } from '@/lib/db';
 import { rolesConfig } from '@/lib/db/schema';
 import { isValidHexString } from '@/utils/is-valid-hex-string';
 import { ApplyOptions } from '@sapphire/decorators';
-import {
-    InteractionHandler,
-    InteractionHandlerTypes,
-} from '@sapphire/framework';
+import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import { stripIndents } from 'common-tags';
 import {
     ActionRowBuilder,
@@ -22,26 +19,17 @@ import { eq } from 'drizzle-orm';
 })
 export class RoleConfigHandler extends InteractionHandler {
     public override parse(interaction: ModalSubmitInteraction) {
-        if (interaction.customId !== 'role-config-create-modal')
-            return this.none();
+        if (interaction.customId !== 'role-config-create-modal') return this.none();
         return this.some();
     }
 
     public override async run(interaction: ModalSubmitInteraction) {
         await interaction.deferUpdate();
 
-        const itemId = interaction.fields.getTextInputValue(
-            'role-config-create-itemId',
-        );
-        const itemName = interaction.fields.getTextInputValue(
-            'role-config-create-itemName',
-        );
-        const itemType = interaction.fields.getTextInputValue(
-            'role-config-create-itemType',
-        );
-        const itemHexColor = interaction.fields.getTextInputValue(
-            'role-config-create-itemHexColor',
-        );
+        const itemId = interaction.fields.getTextInputValue('role-config-create-itemId');
+        const itemName = interaction.fields.getTextInputValue('role-config-create-itemName');
+        const itemType = interaction.fields.getTextInputValue('role-config-create-itemType');
+        const itemHexColor = interaction.fields.getTextInputValue('role-config-create-itemHexColor');
 
         const roleConfig = await db.query.rolesConfig.findFirst({
             where: eq(rolesConfig.itemId, itemId),
@@ -70,9 +58,7 @@ export class RoleConfigHandler extends InteractionHandler {
                     Item hex color: ${inlineCode(itemHexColor)}
                 `,
             )
-            .setThumbnail(
-                `https://singlecolorimage.com/get/${itemHexColor.slice(1)}/200x200`,
-            );
+            .setThumbnail(`https://singlecolorimage.com/get/${itemHexColor.slice(1)}/200x200`);
 
         const confirmButton = new ButtonBuilder()
             .setCustomId('role-config-create-confirm')
@@ -82,10 +68,7 @@ export class RoleConfigHandler extends InteractionHandler {
             .setCustomId('role-config-create-cancel')
             .setLabel('Cancel')
             .setStyle(ButtonStyle.Danger);
-        const row = new ActionRowBuilder<ButtonBuilder>().setComponents(
-            confirmButton,
-            cancelButton,
-        );
+        const row = new ActionRowBuilder<ButtonBuilder>().setComponents(confirmButton, cancelButton);
 
         this.container.pendingRoleCreation.set(interaction.user.id, {
             itemId,

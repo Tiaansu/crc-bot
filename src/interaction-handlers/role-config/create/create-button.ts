@@ -1,15 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
-import {
-    InteractionHandler,
-    InteractionHandlerTypes,
-} from '@sapphire/framework';
-import {
-    ActionRowBuilder,
-    ModalBuilder,
-    TextInputBuilder,
-    TextInputStyle,
-    type ButtonInteraction,
-} from 'discord.js';
+import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
+import { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, type ButtonInteraction } from 'discord.js';
 
 @ApplyOptions<InteractionHandler.Options>({
     interactionHandlerType: InteractionHandlerTypes.Button,
@@ -21,9 +12,7 @@ export class RoleConfigHandler extends InteractionHandler {
     }
 
     public override async run(interaction: ButtonInteraction) {
-        const modal = new ModalBuilder()
-            .setCustomId('role-config-create-modal')
-            .setTitle('Role Config');
+        const modal = new ModalBuilder().setCustomId('role-config-create-modal').setTitle('Role Config');
 
         const itemIdInput = new TextInputBuilder()
             .setCustomId('role-config-create-itemId')
@@ -31,8 +20,7 @@ export class RoleConfigHandler extends InteractionHandler {
             .setPlaceholder('e.g. sugar_apple')
             .setRequired(true)
             .setStyle(TextInputStyle.Short);
-        const itemIdRow =
-            new ActionRowBuilder<TextInputBuilder>().addComponents(itemIdInput);
+        const itemIdRow = new ActionRowBuilder<TextInputBuilder>().addComponents(itemIdInput);
 
         const itemNameInput = new TextInputBuilder()
             .setCustomId('role-config-create-itemName')
@@ -40,10 +28,7 @@ export class RoleConfigHandler extends InteractionHandler {
             .setPlaceholder('e.g. Sugar Apple')
             .setRequired(true)
             .setStyle(TextInputStyle.Short);
-        const itemNameRow =
-            new ActionRowBuilder<TextInputBuilder>().addComponents(
-                itemNameInput,
-            );
+        const itemNameRow = new ActionRowBuilder<TextInputBuilder>().addComponents(itemNameInput);
 
         const itemTypeInput = new TextInputBuilder()
             .setCustomId('role-config-create-itemType')
@@ -51,10 +36,7 @@ export class RoleConfigHandler extends InteractionHandler {
             .setPlaceholder('e.g. seed')
             .setRequired(true)
             .setStyle(TextInputStyle.Short);
-        const itemTypeRow =
-            new ActionRowBuilder<TextInputBuilder>().addComponents(
-                itemTypeInput,
-            );
+        const itemTypeRow = new ActionRowBuilder<TextInputBuilder>().addComponents(itemTypeInput);
 
         const itemHexColor = new TextInputBuilder()
             .setCustomId('role-config-create-itemHexColor')
@@ -63,9 +45,7 @@ export class RoleConfigHandler extends InteractionHandler {
             .setRequired(true)
             .setStyle(TextInputStyle.Short);
 
-        const hexRow = new ActionRowBuilder<TextInputBuilder>().setComponents(
-            itemHexColor,
-        );
+        const hexRow = new ActionRowBuilder<TextInputBuilder>().setComponents(itemHexColor);
 
         modal.addComponents(itemIdRow, itemNameRow, itemTypeRow, hexRow);
         return await interaction.showModal(modal);

@@ -11,9 +11,7 @@ import { initializePusher } from './utils/pusher';
 function startHeartbeat() {
     new Cron('0 */14 * * * *', async () => {
         try {
-            const response = await fetch(
-                'https://crc-bot.onrender.com?from=local',
-            );
+            const response = await fetch('https://crc-bot.onrender.com?from=local');
 
             if (!response.ok) {
                 container.logger.error('Heartbeat failed');

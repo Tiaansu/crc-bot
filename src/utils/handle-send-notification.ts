@@ -1,12 +1,7 @@
 import { db } from '@/lib/db';
 import { channels, roles } from '@/lib/db/schema';
 import { $fetch } from '@/lib/fetch';
-import type {
-    notificationSchema,
-    stockSchema,
-    travellingMerchantSchema,
-    weatherSchema,
-} from '@/lib/schemas/gag-ws';
+import type { notificationSchema, stockSchema, travellingMerchantSchema, weatherSchema } from '@/lib/schemas/gag-ws';
 import { container } from '@sapphire/pieces';
 import { envParseString } from '@skyra/env-utilities';
 import { oneLineCommaListsAnd, stripIndents } from 'common-tags';
@@ -32,9 +27,7 @@ export async function sendStockNotification(data: {
     container.logger.info('Sending stock update.');
 
     if (!data.seed_stock.length && !data.gear_stock.length) {
-        container.logger.warn(
-            'No stock data available. Cannot send notification.',
-        );
+        container.logger.warn('No stock data available. Cannot send notification.');
         container.logger.info('Data received:', JSON.stringify(data, null, 4));
         return;
     }
@@ -43,8 +36,7 @@ export async function sendStockNotification(data: {
     const emojis = await client.application?.emojis.fetch()!;
     const channelsConfig = await getChannels('stock');
 
-    const referenceData =
-        data.seed_stock?.length > 0 ? data.seed_stock : data.gear_stock;
+    const referenceData = data.seed_stock?.length > 0 ? data.seed_stock : data.gear_stock;
     if (!referenceData.length) {
         container.logger.error('No reference data available for timestamps');
         return;
@@ -59,20 +51,14 @@ export async function sendStockNotification(data: {
             url: g.webhookUrl,
         });
 
-        const itemIdsToFind = [
-            ...(data.seed_stock || []),
-            ...(data.gear_stock || []),
-        ].map((item) => item.item_id.replace("'", ''));
+        const itemIdsToFind = [...(data.seed_stock || []), ...(data.gear_stock || [])].map((item) =>
+            item.item_id.replace("'", ''),
+        );
 
         const rolesConfig = await db
             .select()
             .from(roles)
-            .where(
-                and(
-                    eq(roles.guildId, g.guildId),
-                    inArray(roles.forItem, itemIdsToFind),
-                ),
-            );
+            .where(and(eq(roles.guildId, g.guildId), inArray(roles.forItem, itemIdsToFind)));
 
         const embed = createEmbed('Stock', description);
 
@@ -90,14 +76,10 @@ export async function sendStockNotification(data: {
     });
 }
 
-export async function sendEggStockNotification(
-    data: z.infer<typeof stockSchema>,
-) {
+export async function sendEggStockNotification(data: z.infer<typeof stockSchema>) {
     container.logger.info('Sending egg stock update.');
     if (data === undefined || data.length === 0) {
-        container.logger.warn(
-            'Egg stock data is undefined or empty. Cannot send notification.',
-        );
+        container.logger.warn('Egg stock data is undefined or empty. Cannot send notification.');
         return;
     }
 
@@ -120,12 +102,7 @@ export async function sendEggStockNotification(
         const rolesConfig = await db
             .select()
             .from(roles)
-            .where(
-                and(
-                    eq(roles.guildId, g.guildId),
-                    inArray(roles.forItem, itemIdsToFind),
-                ),
-            );
+            .where(and(eq(roles.guildId, g.guildId), inArray(roles.forItem, itemIdsToFind)));
 
         const embed = createEmbed('Egg', description);
 
@@ -139,14 +116,10 @@ export async function sendEggStockNotification(
     });
 }
 
-export async function sendCosmeticStockNotification(
-    data: z.infer<typeof stockSchema>,
-) {
+export async function sendCosmeticStockNotification(data: z.infer<typeof stockSchema>) {
     container.logger.info('Sending cosmetic stock update.');
     if (data === undefined || data.length === 0) {
-        container.logger.warn(
-            'Cosmetic stock data is undefined or empty. Cannot send notification.',
-        );
+        container.logger.warn('Cosmetic stock data is undefined or empty. Cannot send notification.');
         return;
     }
 
@@ -167,12 +140,7 @@ export async function sendCosmeticStockNotification(
         const rolesConfig = await db
             .select()
             .from(roles)
-            .where(
-                and(
-                    eq(roles.guildId, g.guildId),
-                    eq(roles.forType, 'cosmetic'),
-                ),
-            );
+            .where(and(eq(roles.guildId, g.guildId), eq(roles.forType, 'cosmetic')));
 
         const embed = createEmbed('Cosmetic', description);
 
@@ -186,14 +154,10 @@ export async function sendCosmeticStockNotification(
     });
 }
 
-export async function sendEventStockNotification(
-    data: z.infer<typeof stockSchema>,
-) {
+export async function sendEventStockNotification(data: z.infer<typeof stockSchema>) {
     container.logger.info('Sending event shop stock update.');
     if (data === undefined || data.length === 0) {
-        container.logger.warn(
-            'Event shop stock data is undefined or empty. Cannot send notification.',
-        );
+        container.logger.warn('Event shop stock data is undefined or empty. Cannot send notification.');
         return;
     }
 
@@ -214,9 +178,7 @@ export async function sendEventStockNotification(
         const rolesConfig = await db
             .select()
             .from(roles)
-            .where(
-                and(eq(roles.guildId, g.guildId), eq(roles.forType, 'event')),
-            );
+            .where(and(eq(roles.guildId, g.guildId), eq(roles.forType, 'event')));
 
         const embed = createEmbed('Event', description);
 
@@ -230,14 +192,10 @@ export async function sendEventStockNotification(
     });
 }
 
-export async function sendTravellingMerchantStockNotification(
-    data: z.infer<typeof travellingMerchantSchema>,
-) {
+export async function sendTravellingMerchantStockNotification(data: z.infer<typeof travellingMerchantSchema>) {
     container.logger.info('Sending traveling merchant stock update.');
     if (data === undefined || data.stock.length === 0) {
-        container.logger.warn(
-            'Traveling merchant stock data is undefined or empty. Cannot send notification.',
-        );
+        container.logger.warn('Traveling merchant stock data is undefined or empty. Cannot send notification.');
         return;
     }
 
@@ -258,17 +216,9 @@ export async function sendTravellingMerchantStockNotification(
         const rolesConfig = await db
             .select()
             .from(roles)
-            .where(
-                and(
-                    eq(roles.guildId, g.guildId),
-                    eq(roles.forType, 'travelingmerchant'),
-                ),
-            );
+            .where(and(eq(roles.guildId, g.guildId), eq(roles.forType, 'travelingmerchant')));
 
-        const embed = createEmbed(
-            `Traveling Merchant - ${data.merchantName}`,
-            description,
-        );
+        const embed = createEmbed(`Traveling Merchant - ${data.merchantName}`, description);
 
         if (data.stock.length > 0) {
             const text = createStockText(data.merchantName, data.stock, emojis);
@@ -280,14 +230,10 @@ export async function sendTravellingMerchantStockNotification(
     });
 }
 
-export async function sendNotification(
-    data: z.infer<typeof notificationSchema>,
-) {
+export async function sendNotification(data: z.infer<typeof notificationSchema>) {
     container.logger.info('Sending notification.');
     if (data === undefined || data.length === 0) {
-        container.logger.warn(
-            'Notification data is undefined or empty. Cannot send notification.',
-        );
+        container.logger.warn('Notification data is undefined or empty. Cannot send notification.');
         return;
     }
 
@@ -331,14 +277,10 @@ export async function sendNotification(
     });
 }
 
-export async function sendWeatherNotification(
-    data: z.infer<typeof weatherSchema>,
-) {
+export async function sendWeatherNotification(data: z.infer<typeof weatherSchema>) {
     container.logger.info('Sending weather update.');
     if (data === undefined || data.length === 0) {
-        container.logger.warn(
-            'Weather data is undefined or empty. Cannot send notification.',
-        );
+        container.logger.warn('Weather data is undefined or empty. Cannot send notification.');
         return;
     }
 
@@ -359,16 +301,12 @@ export async function sendWeatherNotification(
         const rolesConfig = await db
             .select()
             .from(roles)
-            .where(
-                and(eq(roles.guildId, g.guildId), eq(roles.forType, 'weather')),
-            );
+            .where(and(eq(roles.guildId, g.guildId), eq(roles.forType, 'weather')));
 
         const promise: Promise<APIMessage>[] = [];
 
         activeNow.forEach((weather) => {
-            const weatherInfo = weatherInfos.find(
-                (info) => info.item_id === weather.weather_id,
-            );
+            const weatherInfo = weatherInfos.find((info) => info.item_id === weather.weather_id);
             if (!weatherInfo) return;
 
             const description = stripIndents`
@@ -377,22 +315,11 @@ export async function sendWeatherNotification(
                 Starts at ${time(weather.start_duration_unix)} (${time(weather.start_duration_unix, 'R')}) until ${time(weather.end_duration_unix)} (${time(weather.end_duration_unix, 'R')}).
             `;
 
-            const embed = createEmbed(
-                weatherInfo.display_name,
-                description,
-            ).setThumbnail(weatherInfo.icon);
+            const embed = createEmbed(weatherInfo.display_name, description).setThumbnail(weatherInfo.icon);
 
-            const roleConfig = rolesConfig.find(
-                (role) => role.forItem === weather.weather_id.replace("'", ''),
-            );
+            const roleConfig = rolesConfig.find((role) => role.forItem === weather.weather_id.replace("'", ''));
 
-            promise.push(
-                sendWebhook(
-                    webhook,
-                    embed,
-                    roleConfig ? [roleConfig.roleId] : [],
-                ),
-            );
+            promise.push(sendWebhook(webhook, embed, roleConfig ? [roleConfig.roleId] : []));
         });
 
         await Promise.all(promise);
@@ -437,11 +364,7 @@ function getEmoji(emojis: Collection<string, ApplicationEmoji>, name: string) {
     return emojis.find((emoji) => emoji.name === name) || fallback;
 }
 
-async function sendWebhook(
-    webhook: WebhookClient,
-    embed: EmbedBuilder,
-    roleIds: string[],
-) {
+async function sendWebhook(webhook: WebhookClient, embed: EmbedBuilder, roleIds: string[]) {
     return await webhook.send({
         content: oneLineCommaListsAnd`${roleIds.map((id) => roleMention(id))}`,
         embeds: [embed],

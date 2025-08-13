@@ -1,23 +1,13 @@
 import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { ApplyOptions } from '@sapphire/decorators';
-import {
-    Events,
-    Listener,
-    UserError,
-    type ContextMenuCommandDeniedPayload,
-} from '@sapphire/framework';
+import { Events, Listener, UserError, type ContextMenuCommandDeniedPayload } from '@sapphire/framework';
 import { MessageFlags } from 'discord.js';
 
 @ApplyOptions<Listener.Options>({
     event: Events.ContextMenuCommandDenied,
 })
-export class BotListener extends Listener<
-    typeof Events.ContextMenuCommandDenied
-> {
-    public async run(
-        { message: content }: UserError,
-        { interaction }: ContextMenuCommandDeniedPayload,
-    ) {
+export class BotListener extends Listener<typeof Events.ContextMenuCommandDenied> {
+    public async run({ message: content }: UserError, { interaction }: ContextMenuCommandDeniedPayload) {
         if (isFlaggedForShutdown()) return;
 
         if (interaction.deferred || interaction.replied) {

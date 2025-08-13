@@ -19,12 +19,8 @@ export function addFields(embed: APIEmbed, ...data: APIEmbedField[]): APIEmbed {
 export function truncateEmbed(embed: APIEmbed): APIEmbed {
     return {
         ...embed,
-        description: embed.description
-            ? ellipsis(embed.description, EMBED_DESCRIPTION_LIMIT)
-            : undefined,
-        title: embed.title
-            ? ellipsis(embed.title, EMBED_TITLE_LIMIT)
-            : undefined,
+        description: embed.description ? ellipsis(embed.description, EMBED_DESCRIPTION_LIMIT) : undefined,
+        title: embed.title ? ellipsis(embed.title, EMBED_TITLE_LIMIT) : undefined,
         author: embed.author
             ? {
                   ...embed.author,

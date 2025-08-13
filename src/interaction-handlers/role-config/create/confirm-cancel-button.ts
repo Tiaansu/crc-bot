@@ -2,12 +2,9 @@ import { db } from '@/lib/db';
 import { rolesConfig } from '@/lib/db/schema';
 import { syncRolesForGuild } from '@/utils/sync-roles-for-guild';
 import { ApplyOptions } from '@sapphire/decorators';
-import {
-    InteractionHandler,
-    InteractionHandlerTypes,
-} from '@sapphire/framework';
-import type { ButtonInteraction } from 'discord.js';
+import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import { DurationFormatter } from '@sapphire/time-utilities';
+import type { ButtonInteraction } from 'discord.js';
 
 @ApplyOptions<InteractionHandler.Options>({
     interactionHandlerType: InteractionHandlerTypes.Button,
@@ -32,12 +29,7 @@ export class RoleConfigHandler extends InteractionHandler {
         }
 
         const pending = container.pendingRoleCreation.get(interaction.user.id);
-        if (
-            !pending ||
-            !pending.itemId ||
-            !pending.itemName ||
-            !pending.itemHexColor
-        ) {
+        if (!pending || !pending.itemId || !pending.itemName || !pending.itemHexColor) {
             container.pendingRoleCreation.delete(interaction.user.id);
             return await interaction.editReply({
                 content: 'Cancelled.',
@@ -78,10 +70,7 @@ export class RoleConfigHandler extends InteractionHandler {
     }
 
     private isConfirmOrCancelButton(interaction: ButtonInteraction) {
-        return (
-            this.isConfirmButton(interaction) ||
-            this.isCancelButton(interaction)
-        );
+        return this.isConfirmButton(interaction) || this.isCancelButton(interaction);
     }
 
     private isConfirmButton(interaction: ButtonInteraction) {

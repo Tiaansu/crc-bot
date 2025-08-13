@@ -1,9 +1,6 @@
 import { prepareAndReplyRoleConfig } from '@/utils/role-config-utils';
 import { ApplyOptions } from '@sapphire/decorators';
-import {
-    InteractionHandler,
-    InteractionHandlerTypes,
-} from '@sapphire/framework';
+import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import type { StringSelectMenuInteraction } from 'discord.js';
 
 @ApplyOptions<InteractionHandler.Options>({
@@ -22,12 +19,6 @@ export class RoleConfigHandler extends InteractionHandler {
         await interaction.deferUpdate();
 
         const category = interaction.values[0];
-        return await prepareAndReplyRoleConfig(
-            interaction,
-            category,
-            0,
-            interaction.user.id,
-            'delete',
-        );
+        return await prepareAndReplyRoleConfig(interaction, category, 0, interaction.user.id, 'delete');
     }
 }

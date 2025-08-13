@@ -1,7 +1,7 @@
+import { sendStockNotification } from '@/utils/handle-send-notification';
+import { container } from '@sapphire/pieces';
 import type { z } from 'zod';
 import type { stockSchema } from '../schemas/gag-ws';
-import { container } from '@sapphire/pieces';
-import { sendStockNotification } from '@/utils/handle-send-notification';
 
 type StockData = z.infer<typeof stockSchema>;
 
@@ -41,33 +41,20 @@ export class StockDebounceManager {
             clearTimeout(this.#processingTimer);
         }
 
-        const delay =
-            type === 'seed'
-                ? this.#DEBOUNCE_DELAY_MS.Seed
-                : this.#DEBOUNCE_DELAY_MS.Gear;
-        this.#processingTimer = setTimeout(
-            () => this.processAndResetStockBuffer(),
-            delay,
-        );
+        const delay = type === 'seed' ? this.#DEBOUNCE_DELAY_MS.Seed : this.#DEBOUNCE_DELAY_MS.Gear;
+        this.#processingTimer = setTimeout(() => this.processAndResetStockBuffer(), delay);
     }
 
     private processAndResetStockBuffer() {
         container.logger.info(`Processing stock updates.`);
 
-        if (
-            !this.#pendingStockUpdates.seed_stock &&
-            !this.#pendingStockUpdates.gear_stock
-        ) {
+        if (!this.#pendingStockUpdates.seed_stock && !this.#pendingStockUpdates.gear_stock) {
             return;
         }
 
         const stockPayload = {
-            seed_stock:
-                this.#pendingStockUpdates.seed_stock ??
-                this.#lastSentStockState.seed_stock,
-            gear_stock:
-                this.#pendingStockUpdates.gear_stock ??
-                this.#lastSentStockState.gear_stock,
+            seed_stock: this.#pendingStockUpdates.seed_stock ?? this.#lastSentStockState.seed_stock,
+            gear_stock: this.#pendingStockUpdates.gear_stock ?? this.#lastSentStockState.gear_stock,
         };
 
         sendStockNotification(stockPayload);

@@ -6,9 +6,7 @@ export const infoSchema = z.object({
     rarity: z.string().nullable(),
     currency: z.string().nullable(),
     price: z.string({ required_error: 'price is required' }),
-    icon: z
-        .string({ required_error: 'icon is required' })
-        .url({ message: 'icon must be a valid URL' }),
+    icon: z.string({ required_error: 'icon is required' }).url({ message: 'icon must be a valid URL' }),
     description: z.string({ required_error: 'description is required' }),
     duration: z.string({ required_error: 'duration is required' }),
     last_seen: z.string({ required_error: 'last_seen is required' }),

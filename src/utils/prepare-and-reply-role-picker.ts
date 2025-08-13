@@ -1,17 +1,12 @@
-import type { ButtonInteraction, GuildMember } from 'discord.js';
-import { getCategoryRoles } from './get-category-roles';
 import { db } from '@/lib/db';
 import { roles } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
 import { container } from '@sapphire/pieces';
+import type { ButtonInteraction, GuildMember } from 'discord.js';
+import { eq } from 'drizzle-orm';
+import { getCategoryRoles } from './get-category-roles';
 import { createPagedRolePickerReply } from './role-picker-utils';
 
-export async function prepareAndReply(
-    interaction: ButtonInteraction,
-    category: string,
-    page: number,
-    userId: string,
-) {
+export async function prepareAndReply(interaction: ButtonInteraction, category: string, page: number, userId: string) {
     const guildId = interaction.guildId!;
 
     const categoryRolesConfig = await getCategoryRoles(guildId, category);
@@ -25,9 +20,7 @@ export async function prepareAndReply(
         if (role) {
             validCategoryRoles.push({ name: role.name, id: role.id });
         } else {
-            cleanupPromise.push(
-                db.delete(roles).where(eq(roles.roleId, dbRole.roleId)),
-            );
+            cleanupPromise.push(db.delete(roles).where(eq(roles.roleId, dbRole.roleId)));
         }
     }
 

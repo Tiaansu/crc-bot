@@ -17,8 +17,7 @@ export class BotListener extends Listener {
 
         if (envParseString('NODE_ENV') === 'development') return;
         if (message.author.bot) return;
-        if (message.channel.id !== this.container.config.tradingChannelId)
-            return;
+        if (message.channel.id !== this.container.config.tradingChannelId) return;
         if (!message.channel.isSendable()) return;
 
         const { id: userId } = message.author;
@@ -30,10 +29,7 @@ export class BotListener extends Listener {
             return;
         }
 
-        if (
-            this.globalMessagesCount &&
-            this.globalMessagesCount - lastIndex < this.MESSAGE_COUNT
-        ) {
+        if (this.globalMessagesCount && this.globalMessagesCount - lastIndex < this.MESSAGE_COUNT) {
             const [, msg] = await Promise.all([
                 message.delete(),
                 message.channel.send(
@@ -41,10 +37,7 @@ export class BotListener extends Listener {
                 ),
             ]);
 
-            setTimeout(
-                () => msg.delete().catch(this.container.logger.error),
-                3000,
-            );
+            setTimeout(() => msg.delete().catch(this.container.logger.error), 3000);
             return;
         }
 

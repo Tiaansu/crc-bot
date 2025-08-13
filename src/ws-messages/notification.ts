@@ -1,8 +1,5 @@
 import { notificationSchema } from '@/lib/schemas/gag-ws';
-import {
-    WebSocketMessage,
-    WebSocketMessageEvents,
-} from '@/lib/structures/ws-message';
+import { WebSocketMessage, WebSocketMessageEvents } from '@/lib/structures/ws-message';
 import { sendNotification } from '@/utils/handle-send-notification';
 import { ApplyOptions } from '@sapphire/decorators';
 import type { z } from 'zod';

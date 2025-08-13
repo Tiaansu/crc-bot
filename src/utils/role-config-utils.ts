@@ -19,9 +19,7 @@ interface PagedRoleConfigOptions {
     action: string;
 }
 
-export function createPagedRoleConfigReply(
-    options: PagedRoleConfigOptions,
-): MessageEditOptions {
+export function createPagedRoleConfigReply(options: PagedRoleConfigOptions): MessageEditOptions {
     const { category, allRoles, page, userId, action } = options;
 
     const rolesChunks = chunk(allRoles, 25);
@@ -33,37 +31,24 @@ export function createPagedRoleConfigReply(
         .setMinValues(1)
         .setMaxValues(action === 'delete' ? currentPageRoles.length : 1)
         .addOptions(
-            currentPageRoles.map((role) =>
-                new StringSelectMenuOptionBuilder()
-                    .setLabel(role.name)
-                    .setValue(role.id),
-            ),
+            currentPageRoles.map((role) => new StringSelectMenuOptionBuilder().setLabel(role.name).setValue(role.id)),
         );
 
-    const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-        menu,
-    );
+    const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(menu);
 
     const prevButton = new ButtonBuilder()
-        .setCustomId(
-            `role-config-${action}-page_prev_${category}_${page - 1}_${userId}`,
-        )
+        .setCustomId(`role-config-${action}-page_prev_${category}_${page - 1}_${userId}`)
         .setLabel('Previous')
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(page === 0);
 
     const nextButton = new ButtonBuilder()
-        .setCustomId(
-            `role-config-${action}-page_next_${category}_${page + 1}_${userId}`,
-        )
+        .setCustomId(`role-config-${action}-page_next_${category}_${page + 1}_${userId}`)
         .setLabel('Next')
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(page >= rolesChunks.length - 1);
 
-    const buttonRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        prevButton,
-        nextButton,
-    );
+    const buttonRow = new ActionRowBuilder<ButtonBuilder>().addComponents(prevButton, nextButton);
 
     return {
         content: `Select roles to ${action} from ${category} role config.`,

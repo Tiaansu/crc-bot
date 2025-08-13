@@ -1,8 +1,5 @@
 import { weatherSchema } from '@/lib/schemas/gag-ws';
-import {
-    WebSocketMessage,
-    WebSocketMessageEvents,
-} from '@/lib/structures/ws-message';
+import { WebSocketMessage, WebSocketMessageEvents } from '@/lib/structures/ws-message';
 import { sendWeatherNotification } from '@/utils/handle-send-notification';
 import { ApplyOptions } from '@sapphire/decorators';
 import type { z } from 'zod';

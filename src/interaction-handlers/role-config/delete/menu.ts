@@ -4,15 +4,8 @@ import { gagCategories } from '@/utils/constants';
 import { getCategoryRolesConfig } from '@/utils/get-category-roles';
 import { syncRolesForGuild } from '@/utils/sync-roles-for-guild';
 import { ApplyOptions } from '@sapphire/decorators';
-import {
-    InteractionHandler,
-    InteractionHandlerTypes,
-} from '@sapphire/framework';
-import {
-    type ActionRowData,
-    type ButtonComponentData,
-    type StringSelectMenuInteraction,
-} from 'discord.js';
+import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
+import { type ActionRowData, type ButtonComponentData, type StringSelectMenuInteraction } from 'discord.js';
 import { eq } from 'drizzle-orm';
 import { chunk } from 'lodash';
 
@@ -23,19 +16,13 @@ import { chunk } from 'lodash';
 export class RoleConfigHandler extends InteractionHandler {
     public override parse(interaction: StringSelectMenuInteraction) {
         const [prefix, category] = interaction.customId.split('_');
-        if (
-            prefix !== 'role-config-delete' ||
-            !this.isRoleConfigCategory(category)
-        ) {
+        if (prefix !== 'role-config-delete' || !this.isRoleConfigCategory(category)) {
             return this.none();
         }
         return this.some(category);
     }
 
-    public override async run(
-        interaction: StringSelectMenuInteraction,
-        category: string,
-    ) {
+    public override async run(interaction: StringSelectMenuInteraction, category: string) {
         await interaction.deferUpdate();
         await interaction.editReply({
             content: 'Deleting roles...',
@@ -49,8 +36,7 @@ export class RoleConfigHandler extends InteractionHandler {
         const page = this.getCurrentPage(interaction);
         if (page === null) {
             return await interaction.editReply({
-                content:
-                    'An error occurred while deleting roles. Could not determine the current page.',
+                content: 'An error occurred while deleting roles. Could not determine the current page.',
                 components: [],
                 embeds: [],
             });
@@ -63,9 +49,7 @@ export class RoleConfigHandler extends InteractionHandler {
 
         const rolesToDelete = [...selectedItemIds]
             .filter((id) => rolesOnThisPage.has(id))
-            .map((id) =>
-                db.delete(rolesConfig).where(eq(rolesConfig.itemId, id)),
-            );
+            .map((id) => db.delete(rolesConfig).where(eq(rolesConfig.itemId, id)));
 
         await Promise.all(rolesToDelete);
 
@@ -84,24 +68,14 @@ export class RoleConfigHandler extends InteractionHandler {
         });
     }
 
-    private getCurrentPage(
-        interaction: StringSelectMenuInteraction,
-    ): number | null {
-        const buttonRow = interaction.message
-            .components[1] as ActionRowData<ButtonComponentData> | null;
+    private getCurrentPage(interaction: StringSelectMenuInteraction): number | null {
+        const buttonRow = interaction.message.components[1] as ActionRowData<ButtonComponentData> | null;
         if (!buttonRow) return null;
 
         const pageButton = buttonRow.components.find((c) =>
-            (c as { customId: string }).customId.startsWith(
-                'role-config-delete-page_',
-            ),
+            (c as { customId: string }).customId.startsWith('role-config-delete-page_'),
         );
-        if (
-            !pageButton ||
-            !(pageButton as { customId: string }).customId.startsWith(
-                'role-config-delete-page_',
-            )
-        )
+        if (!pageButton || !(pageButton as { customId: string }).customId.startsWith('role-config-delete-page_'))
             return null;
 
         const parts = (pageButton as { customId: string }).customId.split('_');
@@ -113,8 +87,6 @@ export class RoleConfigHandler extends InteractionHandler {
     }
 
     private isRoleConfigCategory(category: string) {
-        return gagCategories
-            .map((item) => item.toLowerCase())
-            .includes(category);
+        return gagCategories.map((item) => item.toLowerCase()).includes(category);
     }
 }

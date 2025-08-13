@@ -2,10 +2,7 @@ import { db } from '@/lib/db';
 import { rolesConfig } from '@/lib/db/schema';
 import { gagCategories } from '@/utils/constants';
 import { ApplyOptions } from '@sapphire/decorators';
-import {
-    InteractionHandler,
-    InteractionHandlerTypes,
-} from '@sapphire/framework';
+import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import {
     ActionRowBuilder,
     ModalBuilder,
@@ -22,10 +19,7 @@ import { eq } from 'drizzle-orm';
 export class RoleConfigHandler extends InteractionHandler {
     public override parse(interaction: StringSelectMenuInteraction) {
         const [prefix, category] = interaction.customId.split('_');
-        if (
-            prefix !== 'role-config-edit' ||
-            !this.isRoleConfigCategory(category)
-        ) {
+        if (prefix !== 'role-config-edit' || !this.isRoleConfigCategory(category)) {
             return this.none();
         }
         return this.some(category);
@@ -47,9 +41,7 @@ export class RoleConfigHandler extends InteractionHandler {
 
         const { itemId, name, color, type } = roleConfig;
 
-        const modal = new ModalBuilder()
-            .setCustomId('role-config-edit-modal')
-            .setTitle('Role Config');
+        const modal = new ModalBuilder().setCustomId('role-config-edit-modal').setTitle('Role Config');
 
         const itemIdInput = new TextInputBuilder()
             .setCustomId('role-config-edit-itemId')
@@ -58,8 +50,7 @@ export class RoleConfigHandler extends InteractionHandler {
             .setValue(itemId)
             .setRequired(true)
             .setStyle(TextInputStyle.Short);
-        const itemIdRow =
-            new ActionRowBuilder<TextInputBuilder>().addComponents(itemIdInput);
+        const itemIdRow = new ActionRowBuilder<TextInputBuilder>().addComponents(itemIdInput);
 
         const itemNameInput = new TextInputBuilder()
             .setCustomId('role-config-edit-itemName')
@@ -68,10 +59,7 @@ export class RoleConfigHandler extends InteractionHandler {
             .setValue(name)
             .setRequired(true)
             .setStyle(TextInputStyle.Short);
-        const itemNameRow =
-            new ActionRowBuilder<TextInputBuilder>().addComponents(
-                itemNameInput,
-            );
+        const itemNameRow = new ActionRowBuilder<TextInputBuilder>().addComponents(itemNameInput);
 
         const itemTypeInput = new TextInputBuilder()
             .setCustomId('role-config-edit-itemType')
@@ -80,10 +68,7 @@ export class RoleConfigHandler extends InteractionHandler {
             .setValue(type)
             .setRequired(true)
             .setStyle(TextInputStyle.Short);
-        const itemTypeRow =
-            new ActionRowBuilder<TextInputBuilder>().addComponents(
-                itemTypeInput,
-            );
+        const itemTypeRow = new ActionRowBuilder<TextInputBuilder>().addComponents(itemTypeInput);
 
         const itemHexColor = new TextInputBuilder()
             .setCustomId('role-config-edit-itemHexColor')
@@ -92,9 +77,7 @@ export class RoleConfigHandler extends InteractionHandler {
             .setValue(`#${color.toString(16).padStart(6, '0')}`)
             .setRequired(true)
             .setStyle(TextInputStyle.Short);
-        const hexRow = new ActionRowBuilder<TextInputBuilder>().setComponents(
-            itemHexColor,
-        );
+        const hexRow = new ActionRowBuilder<TextInputBuilder>().setComponents(itemHexColor);
 
         this.container.currentEditingItemId.set(interaction.user.id, itemId);
         modal.addComponents(itemIdRow, itemNameRow, itemTypeRow, hexRow);
@@ -102,8 +85,6 @@ export class RoleConfigHandler extends InteractionHandler {
     }
 
     private isRoleConfigCategory(category: string) {
-        return gagCategories
-            .map((item) => item.toLowerCase())
-            .includes(category);
+        return gagCategories.map((item) => item.toLowerCase()).includes(category);
     }
 }

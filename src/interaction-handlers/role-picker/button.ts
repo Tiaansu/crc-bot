@@ -4,10 +4,7 @@ import { gagCategories } from '@/utils/constants';
 import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { prepareAndReply } from '@/utils/prepare-and-reply-role-picker';
 import { ApplyOptions } from '@sapphire/decorators';
-import {
-    InteractionHandler,
-    InteractionHandlerTypes,
-} from '@sapphire/framework';
+import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import { inlineCode, MessageFlags, type ButtonInteraction } from 'discord.js';
 import { and, eq } from 'drizzle-orm';
 
@@ -20,15 +17,11 @@ export class RolePickerHandler extends InteractionHandler {
         if (isFlaggedForShutdown()) return this.none();
 
         const [prefix, category] = interaction.customId.split('_');
-        if (prefix !== 'role-picker' && !this.isRolePickerCategory(category))
-            return this.none();
+        if (prefix !== 'role-picker' && !this.isRolePickerCategory(category)) return this.none();
         return this.some({ category });
     }
 
-    public override async run(
-        interaction: ButtonInteraction,
-        { category }: { category: string },
-    ) {
+    public override async run(interaction: ButtonInteraction, { category }: { category: string }) {
         await interaction.deferReply({
             flags: MessageFlags.Ephemeral,
         });
@@ -54,8 +47,6 @@ export class RolePickerHandler extends InteractionHandler {
     }
 
     private isRolePickerCategory(category: string) {
-        return gagCategories
-            .map((item) => item.toLowerCase())
-            .includes(category);
+        return gagCategories.map((item) => item.toLowerCase()).includes(category);
     }
 }

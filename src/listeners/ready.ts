@@ -1,15 +1,7 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener, Store } from '@sapphire/framework';
 import { envParseString } from '@skyra/env-utilities';
-import {
-    blue,
-    gray,
-    green,
-    magenta,
-    magentaBright,
-    white,
-    yellow,
-} from 'colorette';
+import { blue, gray, green, magenta, magentaBright, white, yellow } from 'colorette';
 import { ActivityType, type Client } from 'discord.js';
 
 @ApplyOptions<Listener.Options>({ once: true, event: Events.ClientReady })
@@ -50,13 +42,9 @@ export class BotListener extends Listener {
         logger.info(' ');
         logger.info(`[${success}] Gateway`);
         if (this.isDev) {
-            logger.info(
-                `${blc('<')}${llc('/')}${blc('>')} ${llc('DEVELOPMENT MODE')}`,
-            );
+            logger.info(`${blc('<')}${llc('/')}${blc('>')} ${llc('DEVELOPMENT MODE')}`);
         }
-        logger.info(
-            `[${success}] Logged in as ${client.user?.username}#${client.user?.discriminator}`,
-        );
+        logger.info(`[${success}] Logged in as ${client.user?.username}#${client.user?.discriminator}`);
         logger.info(' ');
     }
 
@@ -70,8 +58,6 @@ export class BotListener extends Listener {
     }
 
     private styleStore(store: Store<any>, last: boolean) {
-        return gray(
-            `${last ? '└─' : '├─'} ${this.style(store.size.toString().padEnd(3, ' '))} ${store.name}`,
-        );
+        return gray(`${last ? '└─' : '├─'} ${this.style(store.size.toString().padEnd(3, ' '))} ${store.name}`);
     }
 }

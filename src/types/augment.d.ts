@@ -48,9 +48,7 @@ declare module '@sapphire/pieces' {
 
 declare module '@sapphire/framework' {
     interface ILogger {
-        webhookError(
-            builder: (builder: WebhookErrorBuilder) => WebhookErrorBuilder,
-        ): Promise<void>;
+        webhookError(builder: (builder: WebhookErrorBuilder) => WebhookErrorBuilder): Promise<void>;
     }
 
     interface Preconditions {

@@ -12,10 +12,7 @@ export async function processInBatch<T, R>(
         results = results.concat(batchResults);
 
         if (progressCallback) {
-            progressCallback(
-                Math.min(i + batchSize, items.length),
-                items.length,
-            );
+            progressCallback(Math.min(i + batchSize, items.length), items.length);
         }
     }
     return results;

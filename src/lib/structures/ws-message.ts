@@ -8,10 +8,7 @@ export abstract class WebSocketMessage<
     public readonly event: WebSocketMessageEvents;
     public readonly schema: ZodTypeAny;
 
-    public constructor(
-        context: WebSocketMessage.LoaderContext,
-        options: Options,
-    ) {
+    public constructor(context: WebSocketMessage.LoaderContext, options: Options) {
         super(context, options);
 
         this.event = options.event;
@@ -27,9 +24,7 @@ export abstract class WebSocketMessage<
             const errorMessage = Object.entries(error.flatten().fieldErrors)
                 .map(([key, errors]) => `${key}: ${(errors ?? []).join(', ')}`)
                 .join(' | ');
-            this.container.logger.error(
-                `WebSocket message parse error(${this.event}): ${errorMessage}`,
-            );
+            this.container.logger.error(`WebSocket message parse error(${this.event}): ${errorMessage}`);
             return this.none();
         }
         return this.some(data);
@@ -51,14 +46,14 @@ export interface WebSocketMessageOptions extends Piece.Options {
     readonly schema: ZodTypeAny;
 }
 
-export type WebSocketMessageParseResult<Instance extends WebSocketMessage> =
-    Option.UnwrapSome<Awaited<ReturnType<Instance['parse']>>>;
+export type WebSocketMessageParseResult<Instance extends WebSocketMessage> = Option.UnwrapSome<
+    Awaited<ReturnType<Instance['parse']>>
+>;
 
 export namespace WebSocketMessage {
     export type LoaderContext = Piece.LoaderContext<'ws-messages'>;
     export type Options = WebSocketMessageOptions;
-    export type ParseResult<Instance extends WebSocketMessage> =
-        WebSocketMessageParseResult<Instance>;
+    export type ParseResult<Instance extends WebSocketMessage> = WebSocketMessageParseResult<Instance>;
 }
 
 export enum WebSocketMessageEvents {

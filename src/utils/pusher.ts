@@ -24,8 +24,7 @@ export async function initializePusher() {
     return new Promise(async (resolve) => {
         container.logger.info('Binding events...');
 
-        container.pusher.mainChannel =
-            container.pusher.client.subscribe('crc-bot');
+        container.pusher.mainChannel = container.pusher.client.subscribe('crc-bot');
         container.pusher.mainChannel.bind('instance-changes', (id: string) => {
             if (typeof id !== 'string') return resolve(1);
 
@@ -47,20 +46,13 @@ export async function initializePusher() {
         });
 
         container.logger.info('Waiting for pusher to connect...');
-        while (
-            container.pusher.mainChannel &&
-            !container.pusher.mainChannel.subscribed
-        ) {
+        while (container.pusher.mainChannel && !container.pusher.mainChannel.subscribed) {
             /* do nothing */
             await new Promise((resolve) => setTimeout(resolve, 50));
         }
 
         container.logger.info('Pusher initialized.');
         container.logger.info('Checking for instance changes...');
-        container.pusher.server.trigger(
-            'crc-bot',
-            'instance-changes',
-            getRenderId(),
-        );
+        container.pusher.server.trigger('crc-bot', 'instance-changes', getRenderId());
     });
 }

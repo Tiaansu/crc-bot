@@ -1,10 +1,7 @@
 import { db } from '@/lib/db';
 import { roles, rolesConfig } from '@/lib/db/schema';
 import { ApplyOptions } from '@sapphire/decorators';
-import {
-    InteractionHandler,
-    InteractionHandlerTypes,
-} from '@sapphire/framework';
+import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import type { ButtonInteraction } from 'discord.js';
 import { and, eq } from 'drizzle-orm';
 
@@ -21,9 +18,7 @@ export class RoleConfigHandler extends InteractionHandler {
         const { container } = this;
         await interaction.deferUpdate();
 
-        const editingItemId = this.container.currentEditingItemId.get(
-            interaction.user.id,
-        );
+        const editingItemId = this.container.currentEditingItemId.get(interaction.user.id);
         if (!editingItemId) {
             container.pendingRoleCreation.delete(interaction.user.id);
             container.currentEditingItemId.delete(interaction.user.id);
@@ -45,12 +40,7 @@ export class RoleConfigHandler extends InteractionHandler {
         }
 
         const pending = container.pendingRoleCreation.get(interaction.user.id);
-        if (
-            !pending ||
-            !pending.itemId ||
-            !pending.itemName ||
-            !pending.itemHexColor
-        ) {
+        if (!pending || !pending.itemId || !pending.itemName || !pending.itemHexColor) {
             container.pendingRoleCreation.delete(interaction.user.id);
             container.currentEditingItemId.delete(interaction.user.id);
             return await interaction.editReply({
@@ -84,10 +74,7 @@ export class RoleConfigHandler extends InteractionHandler {
 
         for (const guild of guilds.values()) {
             const dbRoles = await db.query.roles.findFirst({
-                where: and(
-                    eq(roles.guildId, guild.id),
-                    eq(roles.forItem, editingItemId),
-                ),
+                where: and(eq(roles.guildId, guild.id), eq(roles.forItem, editingItemId)),
             });
             if (!dbRoles) continue;
 
@@ -113,10 +100,7 @@ export class RoleConfigHandler extends InteractionHandler {
     }
 
     private isConfirmOrCancelButton(interaction: ButtonInteraction) {
-        return (
-            this.isConfirmButton(interaction) ||
-            this.isCancelButton(interaction)
-        );
+        return this.isConfirmButton(interaction) || this.isCancelButton(interaction);
     }
 
     private isConfirmButton(interaction: ButtonInteraction) {

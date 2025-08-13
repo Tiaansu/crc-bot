@@ -15,36 +15,23 @@ export class BotListener extends Listener {
     #MUTE_MINUTES: number = 10; // default
 
     public async run(message: Message) {
-        if (
-            envParseString('NODE_ENV') !== 'development' &&
-            message.guildId !== this.container.config.guildId
-        )
-            return;
+        if (envParseString('NODE_ENV') !== 'development' && message.guildId !== this.container.config.guildId) return;
 
         if (isFlaggedForShutdown()) return;
 
         if (message.author.bot) return;
-        if (message.channel.id !== this.container.config.tradingChannelId)
-            return;
+        if (message.channel.id !== this.container.config.tradingChannelId) return;
         if (!message.channel.isSendable()) return;
         if (!message.member) return;
 
         const { id: userId } = message.author;
-        if (
-            envParseString('NODE_ENV') !== 'development' &&
-            this.container.config.serverAdminIds.includes(userId)
-        ) {
+        if (envParseString('NODE_ENV') !== 'development' && this.container.config.serverAdminIds.includes(userId)) {
             return;
         }
 
-        const mentions = message.mentions.users.filter(
-            (m) => m.id !== userId && !m.bot,
-        );
+        const mentions = message.mentions.users.filter((m) => m.id !== userId && !m.bot);
         const [, reference] = await safeAwait(message.fetchReference());
-        if (
-            mentions.size === 0 &&
-            (!reference || message.type !== MessageType.Reply)
-        ) {
+        if (mentions.size === 0 && (!reference || message.type !== MessageType.Reply)) {
             return;
         }
 

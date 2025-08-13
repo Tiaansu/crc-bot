@@ -17,8 +17,7 @@ export class BotListener extends Listener {
         if (isFlaggedForShutdown()) return;
 
         if (message.author.bot) return;
-        if (message.channel.id !== this.container.config.wflLoungeChannelId)
-            return;
+        if (message.channel.id !== this.container.config.wflLoungeChannelId) return;
 
         await Promise.all([
             message.react(this.#EMOJIES.Win),

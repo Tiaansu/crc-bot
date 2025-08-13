@@ -1,10 +1,7 @@
 import { gagCategories } from '@/utils/constants';
 import { getCategoryRoles } from '@/utils/get-category-roles';
 import { ApplyOptions } from '@sapphire/decorators';
-import {
-    InteractionHandler,
-    InteractionHandlerTypes,
-} from '@sapphire/framework';
+import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import {
     EmbedBuilder,
     GuildMember,
@@ -28,23 +25,16 @@ export class RolePickerHandler extends InteractionHandler {
         return this.some(category);
     }
 
-    public override async run(
-        interaction: StringSelectMenuInteraction,
-        category: string,
-    ) {
+    public override async run(interaction: StringSelectMenuInteraction, category: string) {
         await interaction.deferUpdate();
 
-        const allCategoryRoles = await getCategoryRoles(
-            interaction.guildId!,
-            category,
-        );
+        const allCategoryRoles = await getCategoryRoles(interaction.guildId!, category);
         const categoryRoleIds = allCategoryRoles.map((r) => r.roleId);
 
         const page = this.getCurrentPage(interaction);
         if (page === null) {
             return await interaction.followUp({
-                content:
-                    'An error occurred while updating your roles. Could not determine the current page.',
+                content: 'An error occurred while updating your roles. Could not determine the current page.',
                 flags: MessageFlags.Ephemeral,
             });
         }
@@ -55,9 +45,7 @@ export class RolePickerHandler extends InteractionHandler {
         const member = interaction.member as GuildMember;
         const currentMemberRoleIds = new Set(
             member.roles.cache
-                .filter(
-                    (role) => role.id !== interaction.guildId && !role.managed,
-                )
+                .filter((role) => role.id !== interaction.guildId && !role.managed)
                 .map((role) => role.id),
         );
 
@@ -79,21 +67,11 @@ export class RolePickerHandler extends InteractionHandler {
 
         const promise = [];
         if (rolesToAdd.length > 0) {
-            promise.push(
-                member.roles.add(
-                    rolesToAdd,
-                    `Role picker: Added ${category} roles`,
-                ),
-            );
+            promise.push(member.roles.add(rolesToAdd, `Role picker: Added ${category} roles`));
         }
 
         if (rolesToRemove.length > 0) {
-            promise.push(
-                member.roles.remove(
-                    rolesToRemove,
-                    `Role picker: Removed ${category} roles`,
-                ),
-            );
+            promise.push(member.roles.remove(rolesToRemove, `Role picker: Removed ${category} roles`));
         }
 
         await Promise.all(promise);
@@ -101,9 +79,7 @@ export class RolePickerHandler extends InteractionHandler {
         const embed = new EmbedBuilder()
             .setTitle('Role Picker')
             .setColor('Yellow')
-            .setDescription(
-                `Your roles have been successfully updated for this page.`,
-            );
+            .setDescription(`Your roles have been successfully updated for this page.`);
 
         await interaction.followUp({
             embeds: [embed],
@@ -112,23 +88,14 @@ export class RolePickerHandler extends InteractionHandler {
         return;
     }
 
-    private getCurrentPage(
-        interaction: StringSelectMenuInteraction,
-    ): number | null {
-        const buttonRow = interaction.message
-            .components[1] as ActionRowData<ButtonComponentData> | null;
+    private getCurrentPage(interaction: StringSelectMenuInteraction): number | null {
+        const buttonRow = interaction.message.components[1] as ActionRowData<ButtonComponentData> | null;
         if (!buttonRow) return null;
 
         const pageButton = buttonRow.components.find((comp) =>
             (comp as { customId: string }).customId.startsWith('role-page_'),
         );
-        if (
-            !pageButton ||
-            !(pageButton as { customId: string }).customId.startsWith(
-                'role-page_',
-            )
-        )
-            return null;
+        if (!pageButton || !(pageButton as { customId: string }).customId.startsWith('role-page_')) return null;
 
         const parts = (pageButton as { customId: string }).customId.split('_');
         const action = parts[1];
@@ -139,8 +106,6 @@ export class RolePickerHandler extends InteractionHandler {
     }
 
     private isRolePickerCategory(category: string) {
-        return gagCategories
-            .map((item) => item.toLowerCase())
-            .includes(category);
+        return gagCategories.map((item) => item.toLowerCase()).includes(category);
     }
 }

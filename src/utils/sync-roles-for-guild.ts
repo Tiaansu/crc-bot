@@ -5,14 +5,10 @@ import { PermissionFlagsBits, type Guild } from 'discord.js';
 import { and, eq } from 'drizzle-orm';
 
 export async function syncRolesForGuild(guild: Guild) {
-    container.logger.info(
-        `Syncing roles for guild: ${guild.name} (${guild.id})`,
-    );
+    container.logger.info(`Syncing roles for guild: ${guild.name} (${guild.id})`);
 
     if (!guild.members.me?.permissions.has(PermissionFlagsBits.ManageRoles)) {
-        container.logger.warn(
-            `Missing 'Manage Roles' permission in guild ${guild.name} (${guild.id})`,
-        );
+        container.logger.warn(`Missing 'Manage Roles' permission in guild ${guild.name} (${guild.id})`);
         return;
     }
 
@@ -23,15 +19,11 @@ export async function syncRolesForGuild(guild: Guild) {
         ]);
 
         const roleConfigIds = roleConfig.map((item) => item.itemId);
-        const existingGuildRolesMap = new Map(
-            existingGuildRoles.map((r) => [r.forItem, r.roleId]),
-        );
+        const existingGuildRolesMap = new Map(existingGuildRoles.map((r) => [r.forItem, r.roleId]));
 
         const guildRoles = await guild.roles.fetch();
 
-        const rolesToDelete = existingGuildRoles.filter(
-            (r) => !roleConfigIds.includes(r.forItem),
-        );
+        const rolesToDelete = existingGuildRoles.filter((r) => !roleConfigIds.includes(r.forItem));
 
         const promise = [];
 
@@ -39,36 +31,18 @@ export async function syncRolesForGuild(guild: Guild) {
             const guildRole = guildRoles.get(role.roleId);
 
             if (guildRole) {
-                promise.push(
-                    guildRole.delete(
-                        `Role no longer configured: ${role.forItem}`,
-                    ),
-                );
+                promise.push(guildRole.delete(`Role no longer configured: ${role.forItem}`));
             }
 
-            promise.push(
-                db
-                    .delete(roles)
-                    .where(
-                        and(
-                            eq(roles.guildId, guild.id),
-                            eq(roles.roleId, role.roleId),
-                        ),
-                    ),
-            );
+            promise.push(db.delete(roles).where(and(eq(roles.guildId, guild.id), eq(roles.roleId, role.roleId))));
         }
 
         for (const role of roleConfig) {
             const existingRole = existingGuildRolesMap.get(role.itemId);
-            const guildRole = existingRole
-                ? guild.roles.cache.get(existingRole)
-                : null;
+            const guildRole = existingRole ? guild.roles.cache.get(existingRole) : null;
 
             if (guildRole) {
-                if (
-                    guildRole.name !== role.name ||
-                    guildRole.color !== role.color
-                ) {
+                if (guildRole.name !== role.name || guildRole.color !== role.color) {
                     promise.push(
                         guildRole.edit({
                             name: role.name,
@@ -95,13 +69,8 @@ export async function syncRolesForGuild(guild: Guild) {
 
         await Promise.all(promise);
 
-        container.logger.info(
-            `Finished sync for guild: ${guild.name} (${guild.id})`,
-        );
+        container.logger.info(`Finished sync for guild: ${guild.name} (${guild.id})`);
     } catch (error) {
-        container.logger.info(
-            `Failed to sync roles for guild: ${guild.name} (${guild.id})`,
-            error,
-        );
+        container.logger.info(`Failed to sync roles for guild: ${guild.name} (${guild.id})`, error);
     }
 }

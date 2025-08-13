@@ -2,10 +2,7 @@ import { Store } from '@sapphire/pieces';
 import { Result } from '@sapphire/result';
 import { WebSocketMessage, WebSocketMessageEvents } from './ws-message';
 
-export class WebSocketMessageStore extends Store<
-    WebSocketMessage,
-    'ws-messages'
-> {
+export class WebSocketMessageStore extends Store<WebSocketMessage, 'ws-messages'> {
     public constructor() {
         super(WebSocketMessage, { name: 'ws-messages' });
     }

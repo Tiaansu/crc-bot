@@ -1,9 +1,6 @@
 import { prepareAndReplyRoleConfig } from '@/utils/role-config-utils';
 import { ApplyOptions } from '@sapphire/decorators';
-import {
-    InteractionHandler,
-    InteractionHandlerTypes,
-} from '@sapphire/framework';
+import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import { MessageFlags, type ButtonInteraction } from 'discord.js';
 
 @ApplyOptions<InteractionHandler.Options>({
@@ -12,13 +9,9 @@ import { MessageFlags, type ButtonInteraction } from 'discord.js';
 })
 export class RoleConfigHandler extends InteractionHandler {
     public override async parse(interaction: ButtonInteraction) {
-        const [prefix, action, category, pageStr, userId] =
-            interaction.customId.split('_');
+        const [prefix, action, category, pageStr, userId] = interaction.customId.split('_');
 
-        if (
-            prefix !== 'role-config-delete-page' ||
-            (action !== 'prev' && action !== 'next')
-        ) {
+        if (prefix !== 'role-config-delete-page' || (action !== 'prev' && action !== 'next')) {
             return this.none();
         }
 
@@ -35,19 +28,9 @@ export class RoleConfigHandler extends InteractionHandler {
 
     public override async run(
         interaction: ButtonInteraction,
-        {
-            page,
-            category,
-            userId,
-        }: { page: number; category: string; userId: string },
+        { page, category, userId }: { page: number; category: string; userId: string },
     ) {
         await interaction.deferUpdate();
-        return await prepareAndReplyRoleConfig(
-            interaction,
-            category,
-            page,
-            userId,
-            'delete',
-        );
+        return await prepareAndReplyRoleConfig(interaction, category, page, userId, 'delete');
     }
 }

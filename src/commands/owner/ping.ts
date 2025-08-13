@@ -2,11 +2,7 @@ import { API_URL } from '@/utils/constants';
 import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { ping } from '@/utils/ping';
 import { ApplyOptions } from '@sapphire/decorators';
-import {
-    ApplicationCommandRegistry,
-    Command,
-    type Awaitable,
-} from '@sapphire/framework';
+import { ApplicationCommandRegistry, Command, type Awaitable } from '@sapphire/framework';
 import { stripIndents } from 'common-tags';
 import { EmbedBuilder, MessageFlags } from 'discord.js';
 
@@ -16,17 +12,11 @@ import { EmbedBuilder, MessageFlags } from 'discord.js';
     preconditions: ['BotOwnerOnly'],
 })
 export class BotCommand extends Command {
-    public override registerApplicationCommands(
-        registry: ApplicationCommandRegistry,
-    ): Awaitable<void> {
-        registry.registerChatInputCommand((builder) =>
-            builder.setName(this.name).setDescription(this.description),
-        );
+    public override registerApplicationCommands(registry: ApplicationCommandRegistry): Awaitable<void> {
+        registry.registerChatInputCommand((builder) => builder.setName(this.name).setDescription(this.description));
     }
 
-    public override async chatInputRun(
-        interaction: Command.ChatInputCommandInteraction,
-    ) {
+    public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
         if (isFlaggedForShutdown()) return;
 
         const message = await interaction.deferReply({
@@ -44,9 +34,7 @@ export class BotCommand extends Command {
             },
         ]);
 
-        const { error, downloadTime, totalLatency, ttfb } = await ping(
-            `${API_URL}/growagarden/stock`,
-        );
+        const { error, downloadTime, totalLatency, ttfb } = await ping(`${API_URL}/growagarden/stock`);
         if (!error) {
             embed.addFields([
                 {

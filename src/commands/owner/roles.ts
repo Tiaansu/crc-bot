@@ -1,10 +1,6 @@
 import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { ApplyOptions } from '@sapphire/decorators';
-import {
-    ApplicationCommandRegistry,
-    Command,
-    type Awaitable,
-} from '@sapphire/framework';
+import { ApplicationCommandRegistry, Command, type Awaitable } from '@sapphire/framework';
 import {
     ActionRowBuilder,
     ButtonBuilder,
@@ -19,28 +15,19 @@ import {
     description: 'A command to manage roles.',
     preconditions: ['BotOwnerOnly'],
     requiredClientPermissions: [PermissionFlagsBits.ManageRoles],
-    requiredUserPermissions: [
-        PermissionFlagsBits.ManageRoles | PermissionFlagsBits.Administrator,
-    ],
+    requiredUserPermissions: [PermissionFlagsBits.ManageRoles | PermissionFlagsBits.Administrator],
 })
 export class BotCommand extends Command {
-    public override registerApplicationCommands(
-        registry: ApplicationCommandRegistry,
-    ): Awaitable<void> {
+    public override registerApplicationCommands(registry: ApplicationCommandRegistry): Awaitable<void> {
         registry.registerChatInputCommand((builder) =>
             builder
                 .setName(this.name)
                 .setDescription(this.description)
-                .setDefaultMemberPermissions(
-                    PermissionFlagsBits.ManageRoles |
-                        PermissionFlagsBits.Administrator,
-                ),
+                .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles | PermissionFlagsBits.Administrator),
         );
     }
 
-    public override async chatInputRun(
-        interaction: Command.ChatInputCommandInteraction,
-    ) {
+    public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
         if (isFlaggedForShutdown()) return;
 
         const createBtn = new ButtonBuilder()
@@ -56,11 +43,7 @@ export class BotCommand extends Command {
             .setLabel('Delete')
             .setStyle(ButtonStyle.Danger);
 
-        const row = new ActionRowBuilder<ButtonBuilder>().setComponents(
-            createBtn,
-            editBtn,
-            deleteBtn,
-        );
+        const row = new ActionRowBuilder<ButtonBuilder>().setComponents(createBtn, editBtn, deleteBtn);
 
         const embed = new EmbedBuilder()
             .setTitle('Roles Config')

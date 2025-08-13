@@ -4,10 +4,7 @@ import { gagCategories } from '@/utils/constants';
 import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { syncRolesForGuild } from '@/utils/sync-roles-for-guild';
 import { ApplyOptions } from '@sapphire/decorators';
-import type {
-    ApplicationCommandRegistry,
-    Awaitable,
-} from '@sapphire/framework';
+import type { ApplicationCommandRegistry, Awaitable } from '@sapphire/framework';
 import { Subcommand } from '@sapphire/plugin-subcommands';
 import { stripIndents } from 'common-tags';
 import {
@@ -70,9 +67,7 @@ import postgress from 'postgres';
     ],
 })
 export class BotCommand extends Subcommand {
-    public override registerApplicationCommands(
-        registry: ApplicationCommandRegistry,
-    ): Awaitable<void> {
+    public override registerApplicationCommands(registry: ApplicationCommandRegistry): Awaitable<void> {
         registry.registerChatInputCommand((builder) =>
             builder
                 .setName(this.name)
@@ -80,30 +75,18 @@ export class BotCommand extends Subcommand {
                 .addSubcommandGroup((group) =>
                     group
                         .setName('roles')
-                        .setDescription(
-                            'Setup roles for the bot in the server.',
+                        .setDescription('Setup roles for the bot in the server.')
+                        .addSubcommand((command) =>
+                            command.setName('create').setDescription('Setup roles for the bot in the server.'),
                         )
                         .addSubcommand((command) =>
-                            command
-                                .setName('create')
-                                .setDescription(
-                                    'Setup roles for the bot in the server.',
-                                ),
-                        )
-                        .addSubcommand((command) =>
-                            command
-                                .setName('delete')
-                                .setDescription(
-                                    'Delete bot roles in the server.',
-                                ),
+                            command.setName('delete').setDescription('Delete bot roles in the server.'),
                         ),
                 )
                 .addSubcommand((command) =>
                     command
                         .setName('channels')
-                        .setDescription(
-                            'Setup channels for the bot in the server.',
-                        )
+                        .setDescription('Setup channels for the bot in the server.')
                         .addChannelOption((option) =>
                             option
                                 .setName('stock')
@@ -143,9 +126,7 @@ export class BotCommand extends Subcommand {
                         .addChannelOption((option) =>
                             option
                                 .setName('traveling-merchant')
-                                .setDescription(
-                                    'The traveling merchant channel.',
-                                )
+                                .setDescription('The traveling merchant channel.')
                                 .addChannelTypes(ChannelType.GuildText),
                         ),
                 )
@@ -156,15 +137,11 @@ export class BotCommand extends Subcommand {
                         .addSubcommand((command) =>
                             command
                                 .setName('create')
-                                .setDescription(
-                                    'Setup role pickers for the bot in the server.',
-                                )
+                                .setDescription('Setup role pickers for the bot in the server.')
                                 .addChannelOption((option) =>
                                     option
                                         .setName('channel')
-                                        .setDescription(
-                                            'The channel to setup role pickers in.',
-                                        )
+                                        .setDescription('The channel to setup role pickers in.')
                                         .addChannelTypes(ChannelType.GuildText)
                                         .setRequired(true),
                                 ),
@@ -173,28 +150,20 @@ export class BotCommand extends Subcommand {
         );
     }
 
-    public async chatInputRunRolesCreate(
-        interaction: Subcommand.ChatInputCommandInteraction,
-    ) {
+    public async chatInputRunRolesCreate(interaction: Subcommand.ChatInputCommandInteraction) {
         if (isFlaggedForShutdown()) return;
 
-        await interaction.editReply(
-            'Please wait as the roles are being created...',
-        );
+        await interaction.editReply('Please wait as the roles are being created...');
 
         await syncRolesForGuild(interaction.guild!);
 
         return await interaction.editReply('Roles created.');
     }
 
-    public async chatInputRunRolesDelete(
-        interaction: Subcommand.ChatInputCommandInteraction,
-    ) {
+    public async chatInputRunRolesDelete(interaction: Subcommand.ChatInputCommandInteraction) {
         if (isFlaggedForShutdown()) return;
 
-        await interaction.editReply(
-            'Please wait as the roles are being deleted...',
-        );
+        await interaction.editReply('Please wait as the roles are being deleted...');
 
         const roleConfig = await db.select().from(rolesConfig);
 
@@ -209,9 +178,7 @@ export class BotCommand extends Subcommand {
             promise.push(interaction.guild?.roles.delete(role.id));
         }
 
-        promise.push(
-            db.delete(roles).where(eq(roles.guildId, interaction.guildId!)),
-        );
+        promise.push(db.delete(roles).where(eq(roles.guildId, interaction.guildId!)));
 
         try {
             await Promise.all(promise);
@@ -226,9 +193,7 @@ export class BotCommand extends Subcommand {
         }
     }
 
-    public async chatInputRunChannels(
-        interaction: Subcommand.ChatInputCommandInteraction,
-    ) {
+    public async chatInputRunChannels(interaction: Subcommand.ChatInputCommandInteraction) {
         if (isFlaggedForShutdown()) return;
 
         await Promise.all([
@@ -237,16 +202,8 @@ export class BotCommand extends Subcommand {
             this.insertToChannelTable(interaction, 'cosmetic', 'cosmetic'),
             this.insertToChannelTable(interaction, 'weather', 'weather'),
             this.insertToChannelTable(interaction, 'event', 'event'),
-            this.insertToChannelTable(
-                interaction,
-                'jandel-message',
-                'notification',
-            ),
-            this.insertToChannelTable(
-                interaction,
-                'traveling-merchant',
-                'travelingmerchant',
-            ),
+            this.insertToChannelTable(interaction, 'jandel-message', 'notification'),
+            this.insertToChannelTable(interaction, 'traveling-merchant', 'travelingmerchant'),
         ]);
 
         return await interaction.editReply(`Completed channel setup.`);
@@ -262,7 +219,7 @@ export class BotCommand extends Subcommand {
 
         const webhook = await channel.createWebhook({
             name: 'CRC Bot - Notifier',
-            avatar: this.container.client.user?.avatarURL()!,
+            avatar: this.container.client.user?.avatarURL(),
         });
 
         return db.insert(channels).values({
@@ -272,19 +229,11 @@ export class BotCommand extends Subcommand {
         });
     }
 
-    private getChannel(
-        interaction: Subcommand.ChatInputCommandInteraction,
-        name: string,
-        required: boolean = false,
-    ) {
-        return interaction.options.getChannel(name, required, [
-            ChannelType.GuildText,
-        ]);
+    private getChannel(interaction: Subcommand.ChatInputCommandInteraction, name: string, required: boolean = false) {
+        return interaction.options.getChannel(name, required, [ChannelType.GuildText]);
     }
 
-    public async chatInputRunRolePickerCreate(
-        interaction: Subcommand.ChatInputCommandInteraction,
-    ) {
+    public async chatInputRunRolePickerCreate(interaction: Subcommand.ChatInputCommandInteraction) {
         if (isFlaggedForShutdown()) return;
 
         const rolePicker = await db.query.rolePickers.findFirst({
@@ -292,26 +241,18 @@ export class BotCommand extends Subcommand {
         });
 
         if (rolePicker) {
-            const channel = await interaction.guild?.channels.fetch(
-                rolePicker.channelId,
-            );
+            const channel = await interaction.guild?.channels.fetch(rolePicker.channelId);
             if (channel && channel.type === ChannelType.GuildText) {
-                const message = await channel.messages.fetch(
-                    rolePicker.messageId,
-                );
+                const message = await channel.messages.fetch(rolePicker.messageId);
                 if (message) {
                     return await interaction.editReply(
                         `Role picker already exists at ${message.url}. Run ${inlineCode('/setup role-picker delete')} to delete it.`,
                     );
                 } else {
-                    await db
-                        .delete(rolePickers)
-                        .where(eq(rolePickers.guildId, interaction.guildId!));
+                    await db.delete(rolePickers).where(eq(rolePickers.guildId, interaction.guildId!));
                 }
             } else {
-                await db
-                    .delete(rolePickers)
-                    .where(eq(rolePickers.guildId, interaction.guildId!));
+                await db.delete(rolePickers).where(eq(rolePickers.guildId, interaction.guildId!));
             }
         }
 
