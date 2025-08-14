@@ -1,10 +1,10 @@
 import '@/lib/setup';
 import { container } from '@sapphire/pieces';
 import { envParseString } from '@skyra/env-utilities';
+import type { BunRequest } from 'bun';
 import { Cron } from 'croner';
 import { loadConfig } from './config';
 import { BotClient } from './lib/bot-client';
-import server from './server';
 import { handleWebsocket } from './utils/handle-websocket';
 import { initializePusher } from './utils/pusher';
 
@@ -50,8 +50,21 @@ void loadConfig();
 
 await main().catch(container.logger.error.bind(container.logger));
 
-export default {
-    fetch: server.fetch,
+Bun.serve({
+    routes: {
+        '/': (req: BunRequest<'/'>) => {
+            const { params } = req;
+            const from = (params as Record<string, string>).from;
+
+            container.logger.info(
+                `Pinged at ${new Date().toLocaleString('en-US', {
+                    timeZone: 'Asia/Manila',
+                })} ${from ?? '(unknown)'}`,
+            );
+
+            return Response.json({ message: 'Alive!' });
+        },
+    },
     port: process.env.PORT ?? 10000,
     hostname: '0.0.0.0',
-};
+});
