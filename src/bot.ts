@@ -30,7 +30,7 @@ async function main(): Promise<void> {
     try {
         container.isFlaggedForShutdown = false;
         startHeartbeat();
-        if (envParseString('NODE_ENV') !== 'development') {
+        if (envParseString('NODE_ENV') !== 'development' && envParseString('RENDER_INSTANCE_ID') !== 'local') {
             await initializePusher();
             await new Promise((resolve) => setTimeout(resolve, 250));
             handleWebsocket();
