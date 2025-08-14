@@ -11,6 +11,7 @@ setup(join(rootFolder, '.env'));
 
 export function loadConfig(): void {
     process.env.NODE_ENV ??= 'development';
+    process.env.RENDER_INSTANCE_ID ??= 'local';
 
     const env = envParseString('NODE_ENV');
     const isDev = env !== 'production';
