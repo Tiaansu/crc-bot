@@ -2,6 +2,7 @@ import '@/lib/setup';
 import { container } from '@sapphire/pieces';
 import { envParseString } from '@skyra/env-utilities';
 import { Cron } from 'croner';
+import { Events } from 'discord.js';
 import { loadConfig } from './config';
 import { BotClient } from './lib/bot-client';
 import server from './server';
@@ -27,6 +28,10 @@ function startHeartbeat() {
 async function main(): Promise<void> {
     const client = new BotClient();
 
+    client.rest.on('rateLimited', (event) => container.logger.warn(event));
+    client.rest.on('restDebug', (event) => container.logger.debug(event));
+    client.on(Events.Debug, (event) => container.logger.debug(event));
+
     try {
         container.isFlaggedForShutdown = false;
         startHeartbeat();
@@ -50,7 +55,7 @@ void loadConfig();
 
 await main().catch(container.logger.error.bind(container.logger));
 
-const port = process.env.PORT ?? 1000;
+const port = process.env.PORT ?? 10000;
 console.log(`[bot.ts] Starting to listen on port ${port}...`);
 export default {
     fetch: server.fetch,

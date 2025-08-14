@@ -44,7 +44,7 @@ export const CLIENT_OPTIONS: ClientOptions = {
     partials: [Partials.User, Partials.Channel, Partials.GuildMember, Partials.Message, Partials.Reaction],
     logger: {
         instance: new BotLogger({
-            level: envParseString('NODE_ENV') === 'production' ? LogLevel.Info : LogLevel.Debug,
+            level: envParseString('NODE_ENV') === 'production' ? LogLevel.Debug : LogLevel.Debug,
             join: '\n',
         }),
     },
