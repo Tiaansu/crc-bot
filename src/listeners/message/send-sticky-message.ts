@@ -26,7 +26,7 @@ export class BotListener extends Listener {
         }
 
         const timeout = setTimeout(async () => {
-            await this.handleStickyMessage(message.channel as TextChannel, stickyData);
+            await this.handleStickyMessage(message.channel as TextChannel, stickyData, timeoutId);
         }, 1000);
 
         stickyMessageTimeouts.set(timeoutId, timeout);
@@ -38,16 +38,35 @@ export class BotListener extends Listener {
         });
     }
 
-    private async handleStickyMessage(channel: TextChannel, stickyData: typeof stickyMessages.$inferSelect) {
-        const [, oldMessage] = await safeAwait(channel.messages.fetch(stickyData.lastMessageId!));
+    private async handleStickyMessage(
+        channel: TextChannel,
+        stickyData: typeof stickyMessages.$inferSelect,
+        queueId: string,
+    ) {
+        const { stickyMessageQueue } = this.container;
 
-        if (oldMessage) await oldMessage.delete();
+        if (stickyMessageQueue.has(queueId)) {
+            this.container.logger.debug(`Sticky message already in queue: ${queueId}`);
+            return;
+        }
 
-        const newMessage = await channel.send(stickyData.message);
+        stickyMessageQueue.add(queueId);
 
-        await db
-            .update(stickyMessages)
-            .set({ lastMessageId: newMessage.id })
-            .where(eq(stickyMessages.id, stickyData.id));
+        try {
+            const [, oldMessage] = await safeAwait(channel.messages.fetch(stickyData.lastMessageId!));
+
+            if (oldMessage) await oldMessage.delete();
+
+            const newMessage = await channel.send(stickyData.message);
+
+            await db
+                .update(stickyMessages)
+                .set({ lastMessageId: newMessage.id })
+                .where(eq(stickyMessages.id, stickyData.id));
+        } catch (error) {
+            this.container.logger.error(error);
+        } finally {
+            stickyMessageQueue.delete(queueId);
+        }
     }
 }

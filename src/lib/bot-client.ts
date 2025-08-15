@@ -36,6 +36,7 @@ export class BotClient extends SapphireClient {
         container.currentEditingItemId = new Collection();
         container.stockDebounceManager = new StockDebounceManager();
         container.stickyMessageTimeouts = new Collection();
+        container.stickyMessageQueue = new Set();
     }
 
     private registerCogs() {}
