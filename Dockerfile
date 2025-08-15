@@ -7,7 +7,7 @@ COPY package.json bun.lock /temp/bot/
 RUN cd /temp/bot && bun install --frozen-lockfile
 
 FROM base AS release
-COPY --from=deps /usr/src/app/node_modules node_modules
+COPY --from=deps /temp/bot/node_modules node_modules
 COPY . .
 
 RUN apt-get update && apt-get install -y tzdata && \
