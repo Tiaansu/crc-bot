@@ -35,7 +35,7 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
-            docker login ghcr.io -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.GHCR_TOKEN }}
+            echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
             docker pull ghcr.io/${{ secrets.DOCKER_USERNAME }}/crc-bot:latest
             docker stop crc-bot || true
             docker rm crc-bot || true
