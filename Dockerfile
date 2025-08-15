@@ -17,6 +17,6 @@ RUN apt-get update && apt-get install -y tzdata && \
 
 ENV TZ=Asia/Manila
 
-USER Bun
+USER bun
 
 CMD ["sh", "-c", "bun run db:push && bun start"]
