@@ -39,4 +39,4 @@ jobs:
             docker pull ghcr.io/${{ secrets.DOCKER_USERNAME }}/crc-bot:latest
             docker stop crc-bot || true
             docker rm crc-bot || true
-            docker run -d --name --restart unless-stopped --env-file bot/config/crc-bot.env ghcr.io/${{ secrets.DOCKER_USERNAME }}/crc-bot:latest
+            docker run -d --name crc-bot --restart unless-stopped --env-file bot/config/crc-bot.env ghcr.io/${{ secrets.DOCKER_USERNAME }}/crc-bot:latest
