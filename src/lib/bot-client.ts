@@ -26,7 +26,7 @@ export class BotClient extends SapphireClient {
     public override async destroy(): Promise<void> {
         await super.destroy();
         if (container.socket.readyState === WebSocket.OPEN) {
-            container.socket.close();
+            container.socket.terminate();
         }
     }
 

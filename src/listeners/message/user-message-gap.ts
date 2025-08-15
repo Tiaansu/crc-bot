@@ -1,4 +1,3 @@
-import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
 import { envParseString } from '@skyra/env-utilities';
@@ -13,8 +12,6 @@ export class BotListener extends Listener {
     private globalMessagesCount = 0;
 
     public async run(message: Message) {
-        if (isFlaggedForShutdown()) return;
-
         if (envParseString('NODE_ENV') === 'development') return;
         if (message.author.bot) return;
         if (message.channel.id !== this.container.config.tradingChannelId) return;

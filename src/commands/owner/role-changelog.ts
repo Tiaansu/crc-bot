@@ -1,4 +1,3 @@
-import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { ApplyOptions } from '@sapphire/decorators';
 import { ApplicationCommandRegistry, Command, type Awaitable } from '@sapphire/framework';
 import { oneLineCommaListsAnd } from 'common-tags';
@@ -24,7 +23,7 @@ export class BotCommand extends Command {
     }
 
     public override async contextMenuRun(interaction: Command.ContextMenuCommandInteraction) {
-        if (!interaction.isMessageContextMenuCommand() || isFlaggedForShutdown()) return;
+        if (!interaction.isMessageContextMenuCommand()) return;
 
         const message = interaction.targetMessage;
         if (message.author.id !== this.container.client.user?.id) {

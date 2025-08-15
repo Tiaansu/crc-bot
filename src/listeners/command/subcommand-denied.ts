@@ -1,4 +1,3 @@
-import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener, UserError } from '@sapphire/framework';
 import { SubcommandPluginEvents, type ChatInputSubcommandDeniedPayload } from '@sapphire/plugin-subcommands';
@@ -10,8 +9,6 @@ import { MessageFlags } from 'discord.js';
 })
 export class BotListener extends Listener<typeof SubcommandPluginEvents.ChatInputSubcommandDenied> {
     public async run({ message: content }: UserError, { interaction }: ChatInputSubcommandDeniedPayload) {
-        if (isFlaggedForShutdown()) return;
-
         if (interaction.deferred || interaction.replied) {
             return await interaction.editReply({
                 content,

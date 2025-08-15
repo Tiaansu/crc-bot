@@ -1,4 +1,3 @@
-import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
 import type { Message } from 'discord.js';
@@ -14,8 +13,6 @@ export class BotListener extends Listener {
     };
 
     public async run(message: Message) {
-        if (isFlaggedForShutdown()) return;
-
         if (message.author.bot) return;
         if (message.channel.id !== this.container.config.wflLoungeChannelId) return;
 

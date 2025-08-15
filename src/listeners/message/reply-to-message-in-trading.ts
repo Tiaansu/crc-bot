@@ -1,6 +1,5 @@
 import { db } from '@/lib/db';
 import { offenses } from '@/lib/db/schema';
-import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { safeAwait } from '@/utils/safe-await';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
@@ -16,8 +15,6 @@ export class BotListener extends Listener {
 
     public async run(message: Message) {
         if (envParseString('NODE_ENV') !== 'development' && message.guildId !== this.container.config.guildId) return;
-
-        if (isFlaggedForShutdown()) return;
 
         if (message.author.bot) return;
         if (message.channel.id !== this.container.config.tradingChannelId) return;

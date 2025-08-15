@@ -1,5 +1,4 @@
 import { addFields } from '@/utils/embed';
-import { isFlaggedForShutdown } from '@/utils/flag-for-shutdown';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
 import { stripIndents } from 'common-tags';
@@ -11,8 +10,6 @@ import { escapeMarkdown, type Message } from 'discord.js';
 })
 export class BotListener extends Listener {
     public async run(oldMessage: Message<true>, newMessage: Message<true>) {
-        if (isFlaggedForShutdown()) return;
-
         if (newMessage.author.bot) return;
         if (!newMessage.inGuild()) return;
 

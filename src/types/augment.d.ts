@@ -19,7 +19,6 @@ declare module '@sapphire/pieces' {
     interface Container {
         config: ClientConfig;
         guild: Guild;
-        isFlaggedForShutdown: boolean;
         socket: WebSocket;
         pusher: {
             server: PusherServer;
@@ -74,13 +73,5 @@ declare module '@skyra/env-utilities' {
         DATABASE_URL: string;
 
         JSTUDIO_API_KEY: string;
-        CRC_BOT_API_KEY: string;
-
-        RENDER_INSTANCE_ID: string;
-
-        PUSHER_APP_ID: string;
-        PUSHER_APP_KEY: string;
-        PUSHER_APP_SECRET: string;
-        PUSHER_APP_CLUSTER: string;
     }
 }
