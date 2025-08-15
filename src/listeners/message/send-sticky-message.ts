@@ -41,16 +41,13 @@ export class BotListener extends Listener {
     private async handleStickyMessage(channel: TextChannel, stickyData: typeof stickyMessages.$inferSelect) {
         const [, oldMessage] = await safeAwait(channel.messages.fetch(stickyData.lastMessageId!));
 
-        const result = await Promise.all(
-            oldMessage ? [oldMessage.delete(), channel.send(stickyData.message)] : [channel.send(stickyData.message)],
-        );
+        if (oldMessage) await oldMessage.delete();
 
-        const newMessageId = result?.[oldMessage ? 1 : 0]?.id;
-        if (!newMessageId) return;
+        const newMessage = await channel.send(stickyData.message);
 
         await db
             .update(stickyMessages)
-            .set({ lastMessageId: newMessageId })
+            .set({ lastMessageId: newMessage.id })
             .where(eq(stickyMessages.id, stickyData.id));
     }
 }
