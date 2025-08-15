@@ -36,3 +36,11 @@ export const offenses = pgTable('offenses', {
     userId: text('user_id').notNull(),
     currentOffense: integer('current_offense').notNull().default(1),
 });
+
+export const stickyMessages = pgTable('sticky_messages', {
+    id: uuid('id').primaryKey().defaultRandom(),
+    guildId: text('guild_id').notNull(),
+    channelId: text('channel_id').notNull(),
+    message: text('message').notNull(),
+    lastMessageId: text('last_message_id'),
+});

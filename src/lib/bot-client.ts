@@ -35,6 +35,7 @@ export class BotClient extends SapphireClient {
         container.pendingRoleCreation = new Collection();
         container.currentEditingItemId = new Collection();
         container.stockDebounceManager = new StockDebounceManager();
+        container.stickyMessageTimeouts = new Collection();
     }
 
     private registerCogs() {}

@@ -169,6 +169,13 @@
       "when": 1753791804588,
       "tag": "0023_freezing_fallen_one",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1755250415636,
+      "tag": "0024_certain_violations",
+      "breakpoints": true
     }
   ]
 }

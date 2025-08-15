@@ -27,6 +27,7 @@ declare module '@sapphire/pieces' {
         };
         // weatherStartUnix: Collection<string, number>;
         lastNotificationHash: string;
+        stickyMessageTimeouts: Collection<string, NodeJS.Timeout>;
         stockDebounceManager: StockDebounceManager;
         pendingRoleCreation: Collection<
             string,
