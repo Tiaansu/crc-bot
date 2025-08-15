@@ -3,7 +3,7 @@ WORKDIR /usr/src/app
 
 FROM base AS deps
 RUN mkdir -p /temp/bot
-COPY package.json bunlock /temp/bot/
+COPY package.json bun.lock /temp/bot/
 RUN cd /temp/bot && bun install --frozen-lockfile
 
 FROM base AS release
