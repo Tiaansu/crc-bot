@@ -1,17 +1,14 @@
 FROM oven/bun:latest AS base
 WORKDIR /usr/src/app
 
-FROM base AS install
+FROM base AS deps
 RUN mkdir -p /temp/bot
-COPY package.json bun.lock /temp/bot
+COPY package.json bunlock /temp/bot/
 RUN cd /temp/bot && bun install --frozen-lockfile
 
-FROM base AS prerelease
-COPY --from=install /temp/bot/node_modules node_modules
-COPY . .
-
 FROM base AS release
-COPY --from=prerelease /usr/src/app .
+COPY --from=deps /usr/src/app/node_modules node_modules
+COPY . .
 
 RUN apt-get update && apt-get install -y tzdata && \
     ln -snf /usr/share/zoneinfo/Asia/Manila /etc/localtime && \
@@ -20,6 +17,6 @@ RUN apt-get update && apt-get install -y tzdata && \
 
 ENV TZ=Asia/Manila
 
-USER bun
+USER Bun
 
 CMD ["sh", "-c", "bun run db:push && bun start"]
