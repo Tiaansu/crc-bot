@@ -11,9 +11,9 @@ import { and, eq } from 'drizzle-orm';
 })
 export class BotListener extends Listener {
     public async run(message: Message) {
-        const { stickyMessageTimeouts } = this.container;
+        const { stickyMessageTimeouts, client } = this.container;
 
-        if (message.author.bot) return;
+        if (message.author.id === client.user?.id) return;
         if (!message.guild) return;
         if (message.channel.type !== ChannelType.GuildText) return;
 
