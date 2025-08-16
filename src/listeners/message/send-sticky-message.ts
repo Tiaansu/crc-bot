@@ -26,8 +26,7 @@ export class BotListener extends Listener {
 
         // early checking to prevent duplicate messages
         if (stickyMessageQueue.has(timeoutId)) {
-            this.container.logger.info(`[run] Sticky message already in queue: ${timeoutId}`);
-            stickyMessageQueue.delete(queueId);
+            this.container.logger.info(`Sticky message already in queue: ${timeoutId}`);
             return;
         }
 
@@ -53,13 +52,6 @@ export class BotListener extends Listener {
         queueId: string,
     ) {
         const { stickyMessageQueue } = this.container;
-
-        // second check to prevent duplicate messages
-        if (stickyMessageQueue.has(queueId)) {
-            this.container.logger.info(`[handleStickyMessage] Sticky message already in queue: ${queueId}`);
-            stickyMessageQueue.delete(queueId);
-            return;
-        }
 
         try {
             const latestSticky = await this.getStickyMessage(stickyData.guildId, stickyData.channelId);
