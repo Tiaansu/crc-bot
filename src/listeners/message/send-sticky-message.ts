@@ -57,12 +57,10 @@ export class BotListener extends Listener {
             const latestSticky = await this.getStickyMessage(stickyData.guildId, stickyData.channelId);
             if (!latestSticky) return;
 
-            try {
-                const oldMessage = await channel.messages.fetch(latestSticky.lastMessageId!);
-                if (oldMessage) await oldMessage.delete();
-            } catch (error) {
-                if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownMessage) return;
-                throw error;
+            const [, oldMessage] = await safeAwait(channel.messages.fetch(latestSticky.lastMessageId!));
+
+            if (oldMessage) {
+                await oldMessage.delete();
             }
 
             const newMessage = await channel.send(stickyData.message);
