@@ -74,6 +74,10 @@ export class BotListener extends Listener {
             this.container.logger.error(error);
         } finally {
             stickyMessageQueue.delete(queueId);
+            if (stickyMessageTimeouts.has(queueId)) {
+                clearTimeout(stickyMessageTimeouts.get(queueId)!);
+                stickyMessageTimeouts.delete(queueId);
+            }
         }
     }
 }
