@@ -10,7 +10,7 @@ import { and, eq } from 'drizzle-orm';
 })
 export class BotListener extends Listener {
     public async run(message: Message) {
-        const { stickyMessageTimeouts, client } = this.container;
+        const { stickyMessageTimeouts, client, stickyMessageQueue } = this.container;
 
         if (message.author.id === client.user?.id) return;
         if (!message.guild) return;
@@ -23,6 +23,15 @@ export class BotListener extends Listener {
         if (stickyMessageTimeouts.has(timeoutId)) {
             clearTimeout(stickyMessageTimeouts.get(timeoutId)!);
         }
+
+        // early checking to prevent duplicate messages
+        if (stickyMessageQueue.has(timeoutId)) {
+            this.container.logger.info(`Sticky message already in queue: ${timeoutId}`);
+            return;
+        }
+
+        // early adding to prevent duplicate messages
+        stickyMessageQueue.add(timeoutId);
 
         const timeout = setTimeout(async () => {
             await this.handleStickyMessage(message.channel as TextChannel, stickyData, timeoutId);
@@ -44,12 +53,11 @@ export class BotListener extends Listener {
     ) {
         const { stickyMessageQueue } = this.container;
 
+        // second check to prevent duplicate messages
         if (stickyMessageQueue.has(queueId)) {
             this.container.logger.info(`Sticky message already in queue: ${queueId}`);
             return;
         }
-
-        stickyMessageQueue.add(queueId);
 
         try {
             const latestSticky = await this.getStickyMessage(stickyData.guildId, stickyData.channelId);
