@@ -4,6 +4,7 @@ import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
 import { ChannelType, DiscordAPIError, RESTJSONErrorCodes, type Message, type TextChannel } from 'discord.js';
 import { and, eq } from 'drizzle-orm';
+import { safeAwait } from '@/utils/safe-await';
 
 @ApplyOptions<Listener.Options>({
     event: Events.MessageCreate,
