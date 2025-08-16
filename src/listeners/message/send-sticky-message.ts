@@ -26,7 +26,8 @@ export class BotListener extends Listener {
 
         // early checking to prevent duplicate messages
         if (stickyMessageQueue.has(timeoutId)) {
-            this.container.logger.info(`Sticky message already in queue: ${timeoutId}`);
+            this.container.logger.info(`[run] Sticky message already in queue: ${timeoutId}`);
+            stickyMessageQueue.delete(queueId);
             return;
         }
 
@@ -55,7 +56,8 @@ export class BotListener extends Listener {
 
         // second check to prevent duplicate messages
         if (stickyMessageQueue.has(queueId)) {
-            this.container.logger.info(`Sticky message already in queue: ${queueId}`);
+            this.container.logger.info(`[handleStickyMessage] Sticky message already in queue: ${queueId}`);
+            stickyMessageQueue.delete(queueId);
             return;
         }
 
