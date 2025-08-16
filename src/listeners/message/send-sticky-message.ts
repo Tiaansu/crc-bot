@@ -1,9 +1,8 @@
 import { db } from '@/lib/db';
 import { stickyMessages } from '@/lib/db/schema';
-import { safeAwait } from '@/utils/safe-await';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
-import { ChannelType, type Message, type TextChannel } from 'discord.js';
+import { ChannelType, DiscordAPIError, RESTJSONErrorCodes, type Message, type TextChannel } from 'discord.js';
 import { and, eq } from 'drizzle-orm';
 
 @ApplyOptions<Listener.Options>({
@@ -46,16 +45,23 @@ export class BotListener extends Listener {
         const { stickyMessageQueue } = this.container;
 
         if (stickyMessageQueue.has(queueId)) {
-            this.container.logger.debug(`Sticky message already in queue: ${queueId}`);
+            this.container.logger.info(`Sticky message already in queue: ${queueId}`);
             return;
         }
 
         stickyMessageQueue.add(queueId);
 
         try {
-            const [, oldMessage] = await safeAwait(channel.messages.fetch(stickyData.lastMessageId!));
+            const latestSticky = await this.getStickyMessage(stickyData.guildId, stickyData.channelId);
+            if (!latestSticky) return;
 
-            if (oldMessage) await oldMessage.delete();
+            try {
+                const oldMessage = await channel.messages.fetch(latestSticky.lastMessageId!);
+                if (oldMessage) await oldMessage.delete();
+            } catch (error) {
+                if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownMessage) return;
+                throw error;
+            }
 
             const newMessage = await channel.send(stickyData.message);
 
