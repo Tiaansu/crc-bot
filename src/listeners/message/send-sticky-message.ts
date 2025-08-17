@@ -48,7 +48,7 @@ export class BotListener extends Listener {
                             resolve();
                         }
                     },
-                    envParseString('NODE_ENV') === 'development' ? 1000 : 7500,
+                    envParseString('NODE_ENV') === 'development' ? 1000 : 3000,
                 );
 
                 stickyMessageTimeouts.set(lockId, timeout);
