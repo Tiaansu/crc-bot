@@ -4,14 +4,13 @@ import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
 import { ChannelType, DiscordAPIError, RESTJSONErrorCodes, type Message, type TextChannel } from 'discord.js';
 import { and, eq } from 'drizzle-orm';
-import { safeAwait } from '@/utils/safe-await';
 
 @ApplyOptions<Listener.Options>({
     event: Events.MessageCreate,
 })
 export class BotListener extends Listener {
     public async run(message: Message) {
-        const { stickyMessageTimeouts, client, stickyMessageQueue } = this.container;
+        const { stickyMessageTimeouts, stickyMessageLock, client } = this.container;
 
         if (message.author.id === client.user?.id) return;
         if (!message.guild) return;
@@ -20,25 +19,29 @@ export class BotListener extends Listener {
         const stickyData = await this.getStickyMessage(message.guild.id, message.channelId);
         if (!stickyData) return;
 
-        const timeoutId = `${message.guild.id}.${message.channelId}`;
-        if (stickyMessageTimeouts.has(timeoutId)) {
-            clearTimeout(stickyMessageTimeouts.get(timeoutId)!);
-        }
+        const lockId = `${message.guild.id}.${message.channelId}`;
 
-        // early checking to prevent duplicate messages
-        if (stickyMessageQueue.has(timeoutId)) {
-            this.container.logger.info(`Sticky message already in queue: ${timeoutId}`);
-            return;
-        }
+        const prevLock = stickyMessageLock.get(lockId) ?? Promise.resolve();
 
-        // early adding to prevent duplicate messages
-        stickyMessageQueue.add(timeoutId);
+        const newLock = prevLock.then(async () => {
+            if (stickyMessageTimeouts.has(lockId)) {
+                clearTimeout(stickyMessageTimeouts.get(lockId));
+            }
 
-        const timeout = setTimeout(async () => {
-            await this.handleStickyMessage(message.channel as TextChannel, stickyData, timeoutId);
-        }, 1000);
+            await new Promise<void>((resolve) => {
+                const timeout = setTimeout(async () => {
+                    try {
+                        await this.handleStickyMessage(message.channel as TextChannel, stickyData);
+                    } finally {
+                        resolve();
+                    }
+                }, 1000);
 
-        stickyMessageTimeouts.set(timeoutId, timeout);
+                stickyMessageTimeouts.set(lockId, timeout);
+            });
+        });
+
+        stickyMessageLock.set(lockId, newLock);
     }
 
     private async getStickyMessage(guildId: string, channelId: string) {
@@ -47,21 +50,22 @@ export class BotListener extends Listener {
         });
     }
 
-    private async handleStickyMessage(
-        channel: TextChannel,
-        stickyData: typeof stickyMessages.$inferSelect,
-        queueId: string,
-    ) {
-        const { stickyMessageQueue } = this.container;
-
+    private async handleStickyMessage(channel: TextChannel, stickyData: typeof stickyMessages.$inferSelect) {
         try {
             const latestSticky = await this.getStickyMessage(stickyData.guildId, stickyData.channelId);
             if (!latestSticky) return;
 
-            const [, oldMessage] = await safeAwait(channel.messages.fetch(latestSticky.lastMessageId!));
-
-            if (oldMessage) {
-                await oldMessage.delete();
+            if (latestSticky.lastMessageId) {
+                try {
+                    const oldMessage = await channel.messages.fetch(latestSticky.lastMessageId);
+                    await oldMessage.delete();
+                } catch (error) {
+                    if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownMessage) {
+                        this.container.logger.info(`Sticky message ${latestSticky.lastMessageId} was already deleted.`);
+                    } else {
+                        throw error;
+                    }
+                }
             }
 
             const newMessage = await channel.send(stickyData.message);
@@ -72,12 +76,6 @@ export class BotListener extends Listener {
                 .where(eq(stickyMessages.id, stickyData.id));
         } catch (error) {
             this.container.logger.error(error);
-        } finally {
-            stickyMessageQueue.delete(queueId);
-            if (stickyMessageTimeouts.has(queueId)) {
-                clearTimeout(stickyMessageTimeouts.get(queueId)!);
-                stickyMessageTimeouts.delete(queueId);
-            }
         }
     }
 }
