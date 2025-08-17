@@ -38,6 +38,7 @@ export class BotClient extends SapphireClient {
 
         container.stickyMessageTimeouts = new Collection();
         container.stickyMessageLock = new Collection();
+        container.stickyMessageOperations = new Collection();
     }
 
     private registerCogs() {}

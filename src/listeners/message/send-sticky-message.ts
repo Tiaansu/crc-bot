@@ -2,6 +2,7 @@ import { db } from '@/lib/db';
 import { stickyMessages } from '@/lib/db/schema';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
+import { envParseString } from '@skyra/env-utilities';
 import { ChannelType, DiscordAPIError, RESTJSONErrorCodes, type Message, type TextChannel } from 'discord.js';
 import { and, eq } from 'drizzle-orm';
 
@@ -21,6 +22,9 @@ export class BotListener extends Listener {
 
         const lockId = `${message.guild.id}.${message.channelId}`;
 
+        const operationId = crypto.randomUUID();
+        this.container.stickyMessageOperations.set(lockId, operationId);
+
         const prevLock = stickyMessageLock.get(lockId) ?? Promise.resolve();
 
         const newLock = prevLock.then(async () => {
@@ -29,13 +33,23 @@ export class BotListener extends Listener {
             }
 
             await new Promise<void>((resolve) => {
-                const timeout = setTimeout(async () => {
-                    try {
-                        await this.handleStickyMessage(message.channel as TextChannel, stickyData);
-                    } finally {
-                        resolve();
-                    }
-                }, 7500);
+                const timeout = setTimeout(
+                    async () => {
+                        try {
+                            if (this.container.stickyMessageOperations.get(lockId) !== operationId) return;
+
+                            await this.handleStickyMessage(
+                                message.channel as TextChannel,
+                                stickyData,
+                                lockId,
+                                operationId,
+                            );
+                        } finally {
+                            resolve();
+                        }
+                    },
+                    envParseString('NODE_ENV') === 'development' ? 1000 : 7500,
+                );
 
                 stickyMessageTimeouts.set(lockId, timeout);
             });
@@ -50,10 +64,22 @@ export class BotListener extends Listener {
         });
     }
 
-    private async handleStickyMessage(channel: TextChannel, stickyData: typeof stickyMessages.$inferSelect) {
+    private async handleStickyMessage(
+        channel: TextChannel,
+        stickyData: typeof stickyMessages.$inferSelect,
+        lockId: string,
+        operationId: string,
+    ) {
         try {
             const latestSticky = await this.getStickyMessage(stickyData.guildId, stickyData.channelId);
             if (!latestSticky) return;
+
+            if (this.container.stickyMessageOperations.get(lockId) !== operationId) {
+                this.container.logger.info(`Aborting stale sticky operation for ${lockId}.`);
+                return;
+            }
+
+            const newMessage = await channel.send(stickyData.message);
 
             if (latestSticky.lastMessageId) {
                 try {
@@ -67,8 +93,6 @@ export class BotListener extends Listener {
                     }
                 }
             }
-
-            const newMessage = await channel.send(stickyData.message);
 
             await db
                 .update(stickyMessages)

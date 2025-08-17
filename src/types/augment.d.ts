@@ -28,6 +28,7 @@ declare module '@sapphire/pieces' {
         // weatherStartUnix: Collection<string, number>;
         lastNotificationHash: string;
 
+        stickyMessageOperations: Collection<string, string>;
         stickyMessageLock: Collection<string, Promise<void>>;
         stickyMessageTimeouts: Collection<string, NodeJS.Timeout>;
 
