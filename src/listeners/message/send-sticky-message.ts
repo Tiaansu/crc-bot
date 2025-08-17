@@ -35,7 +35,7 @@ export class BotListener extends Listener {
                     } finally {
                         resolve();
                     }
-                }, 1000);
+                }, 3000);
 
                 stickyMessageTimeouts.set(lockId, timeout);
             });
