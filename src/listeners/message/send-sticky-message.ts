@@ -79,8 +79,6 @@ export class BotListener extends Listener {
                 return;
             }
 
-            const newMessage = await channel.send(stickyData.message);
-
             if (latestSticky.lastMessageId) {
                 try {
                     const oldMessage = await channel.messages.fetch(latestSticky.lastMessageId);
@@ -93,6 +91,7 @@ export class BotListener extends Listener {
                     }
                 }
             }
+            const newMessage = await channel.send(stickyData.message);
 
             await db
                 .update(stickyMessages)
