@@ -12,6 +12,8 @@ export function handleWebsocket() {
     const socket = new WebSocket(WS_URL, {
         headers: {
             'jstudio-key': envParseString('JSTUDIO_API_KEY'),
+            'JStudio-HMAC-Signature': 'jstudio',
+            'JStudio-HMAC-Timestamp': 'jstudio',
         },
     });
     container.socket = socket;

@@ -287,6 +287,8 @@ export async function sendWeatherNotification(data: z.infer<typeof weatherSchema
     const weatherInfos = await $fetch('/growagarden/info?type=weather', {
         headers: {
             'jstudio-key': envParseString('JSTUDIO_API_KEY'),
+            'JStudio-HMAC-Signature': 'jstudio',
+            'JStudio-HMAC-Timestamp': 'jstudio',
         },
     });
 
